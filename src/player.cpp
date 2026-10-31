@@ -8,8 +8,22 @@ Player::Player(Vector2 startPos, float startRad, Color startColor, float startSp
     : Circle(startPos, startRad, startColor)
     , speed(startSpeed)
     , direction(startDirection)
-    , radians(startDirection * (PI / 180.0f))
 {} // Constructor with variables. Calculates radians automatically.
+
+// Simple Getters and Setters.
+float Player::GetDirectionDegrees() const 
+{
+    float degrees = direction * (180.0f / PI);
+    return fmod(degrees, 360.0f);
+}
+void Player::SetDirectionDegrees(float newDegrees) 
+{
+    // Ensure degrees positive and modulo 360.
+    float degrees = fmod(newDegrees, 360.0f);
+    if (degrees < 0.0f) degrees += 360.0f;
+
+    direction = degrees * (PI / 180.0f);
+}
 
 // Player update function.
 void Player::update(const std::vector<Box>& boxes)
@@ -26,8 +40,8 @@ Further cancels out player movement in case of collision with different objects.
     const int screenHeight = GetScreenHeight();
 
     // Calculate movement change based on direction and speed.
-    float deltaX = std::cos(radians) * speed;
-    float deltaY = std::sin(radians) * speed;
+    float deltaX = std::cos(direction) * speed;
+    float deltaY = std::sin(direction) * speed;
 
     // 1. MOVE & CHECK X-AXIS
     // ----------------------
@@ -99,24 +113,21 @@ Smooths out rotation to the target_direction to avoid jittery movement.
     if (speed <= 2.0f) 
     {
         // Directly set the new target_direction as the current direction.
-        radians = target_direction * (PI / 180.0f);
-        direction = target_direction;
+        SetDirectionDegrees(target_direction);
     }
     // Smooth out rotation.
     else if (speed >= 2.0f) 
     {
+        // Get current direction in degrees.
+        float degrees = GetDirectionDegrees();
         // Calculate the difference in direction, between current and target.
-        float difference = target_direction - direction;
+        float difference = target_direction - degrees;
         // Ensure difference rotates the shortest way. Not always to the right or left.
-        difference = std::fmod(difference + 540.0f, 360.0f) - 180.0f;
+        difference = fmod(difference + 540.0f, 360.0f) - 180.0f;
         // Smooth out the transition over time by only rotating a fraction of the difference.
-        direction += (difference * 0.20f);
-        // Ensure direction in degrees.
-        direction = std::fmod(direction, 360.0f);
-        // Ensure positive direction.
-        if (direction < 0.0f) { direction += 360.0f; }
+        degrees += (difference * 0.20f);
         // Convert back to radians for simple movement math.
-        radians = direction * (PI / 180.0f);
+        SetDirectionDegrees(degrees);
     }
 
     // Set new speed after input.

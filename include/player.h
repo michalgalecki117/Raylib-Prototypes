@@ -12,7 +12,14 @@ and limited interaction with different objects.
 public:
     // Constructor with variables.
     // There is no default constructor as player position will depend on created world object.
-    Player(Vector2 startPos, float startRad, Color startColor, float startSpeed, float startDirection); 
+    Player(Vector2 startPos, float startRad, Color startColor, float startSpeed, float startDirectionDegrees); 
+    
+    // Simple Getters and Setters.
+    float GetDirectionDegrees() const;
+    void SetDirectionDegrees(float newDegrees);
+
+    float GetDirectionRadians() const { return direction; }
+    void SetDirectionRadians(float newRadians) { direction = newRadians; }
     
     // Update function regardless of input. (Affects position, speed and direction).
     void update(const std::vector<Box>& boxes);
@@ -23,7 +30,6 @@ public:
 private:
     // Player object being capable of movement, it requires a speed and direction.
     float speed;
+    // Direction directly in radians to simplify math operations.
     float direction;
-    // Direction in degrees converted to radians to simplify math operations.
-    float radians;
 };
