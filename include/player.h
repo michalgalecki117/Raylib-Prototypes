@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 #include <raylib.h>
-#include "gameobject.h"
-#include "box.h"
+#include "geometry.h"
 
 class Player : public GameObject // Player gameobject. 
 /*

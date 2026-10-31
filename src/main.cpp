@@ -2,10 +2,8 @@
 #include <vector>
 
 #include "player.h"
-#include "gameobject.h"
-#include "box.h"
+#include "geometry.h"
 #include "navmesh.h"
-#include "line.h"
 
 #include "perlin.h"
 #include "PerlinNoise.hpp"
