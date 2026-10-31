@@ -19,6 +19,7 @@ public:
     double GetThreshold() const;
     void SetThreshold(double newThreshold); 
 
+    std::vector<Line> GetVertices() const { return lines; }    
 
     // Marching Squares algorithm to generate map vertices based on perlin noise.
     void GenerateVertices(Vector2 dimensions);

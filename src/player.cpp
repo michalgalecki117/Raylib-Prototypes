@@ -26,7 +26,7 @@ void Player::SetDirectionDegrees(float newDegrees)
 }
 
 // Player update function.
-void Player::update(const std::vector<Box>& boxes)
+void Player::update(const std::vector<Box>& boxes, const std::vector<Line>& vertices)
 /*
 Updates player position and speed every frame regardless of input.
 Further cancels out player movement in case of collision with different objects.
@@ -100,6 +100,21 @@ Further cancels out player movement in case of collision with different objects.
             break;
         }
     }
+
+
+    // Border collisions along all axis. (Revert both x and y on border hit)
+    for (const auto& line : vertices) 
+    {
+        if (CheckCollisionCircleLine(position, radius, line.GetPosition(), line.GetEndPos()))
+        {
+            position.x -= deltaX;
+            position.y -= deltaY;
+            speed = 0.0f;
+            break;
+        }
+    }
+
+
 }
 
 // Player update function with key input.
