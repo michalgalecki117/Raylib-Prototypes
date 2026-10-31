@@ -30,7 +30,7 @@ int main()
     std::vector<Box> spawnedBoxes;
 
     // Window initialisation.
-    InitWindow(screenWidth, screenHeight, "Vertices based map with collisions!");
+    InitWindow(screenWidth, screenHeight, "Vertices based map and box colisions test.");
     // TargetFPS to detatch fps from machine performance.
     SetTargetFPS(60);
     
