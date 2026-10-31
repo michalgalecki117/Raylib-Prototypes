@@ -42,6 +42,8 @@ Licences :
 //
 //----------------------------------------------------------------------------------------
 
+Raylib license
+//----------------------------------------------------------------------------------------
 
 Copyright (c) 2013-2026 Ramon Santamaria (@raysan5)
 
@@ -59,3 +61,5 @@ applications, and to alter it and redistribute it freely, subject to the followi
   as being the original software.
 
   3. This notice may not be removed or altered from any source distribution.
+
+//----------------------------------------------------------------------------------------
