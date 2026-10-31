@@ -5,18 +5,11 @@
 #include <cmath>
 
 Player::Player(Vector2 startPos, float startRad, Color startColor, float startSpeed, float startDirection) 
-    : GameObject(startPos, startColor)
+    : Circle(startPos, startRad, startColor)
     , speed(startSpeed)
     , direction(startDirection)
     , radians(startDirection * (PI / 180.0f))
-    , radius(startRad)
 {} // Constructor with variables. Calculates radians automatically.
-
-// Simple circle draw function as player object is a circle.
-void Player::Draw() const 
-{
-    DrawCircleV(position, radius, color);
-}
 
 // Player update function.
 void Player::update(const std::vector<Box>& boxes)

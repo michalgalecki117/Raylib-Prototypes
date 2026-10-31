@@ -76,3 +76,25 @@ protected:
     // Box contains both starting position and dimensions only.
     Vector2 size;
 };
+
+class Circle : public GameObject // Simple circle gameobject.
+{
+public:
+    Circle() : GameObject(), radius(0) {} // Default constructor.
+    Circle(Vector2 startPos, int startRad, Color startColor) 
+    : GameObject(startPos, startColor)
+    , radius(startRad)
+    {} // Contructor with variables.
+    virtual ~Circle() = default; // Default destructor.
+
+    // Simple Getters and Setters.
+    int GetRadius() const { return radius; }
+    void SetRadius(int newRad) { radius = newRad; }
+
+    // Simple box drawing function.
+    void Draw() const { DrawCircleV(position, radius, color); }
+    
+protected:
+    // Box contains both starting position and dimensions only.
+    int radius;
+};

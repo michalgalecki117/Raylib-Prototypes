@@ -3,7 +3,7 @@
 #include <raylib.h>
 #include "geometry.h"
 
-class Player : public GameObject // Player gameobject. 
+class Player : public Circle // Player gameobject. 
 /*
 Currently the only object class capable of movement 
 and limited interaction with different objects.
@@ -14,9 +14,6 @@ public:
     // There is no default constructor as player position will depend on created world object.
     Player(Vector2 startPos, float startRad, Color startColor, float startSpeed, float startDirection); 
     
-    // Simple draw function.
-    void Draw() const override;
-
     // Update function regardless of input. (Affects position, speed and direction).
     void update(const std::vector<Box>& boxes);
 
@@ -29,6 +26,4 @@ private:
     float direction;
     // Direction in degrees converted to radians to simplify math operations.
     float radians;
-    // Player object is a circle by default, therefore possesses a radius.
-    int radius;
 };
