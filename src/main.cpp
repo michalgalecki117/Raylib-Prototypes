@@ -24,7 +24,7 @@ int main()
     Vector2 screenDimensions = { (float)screenWidth, (float)screenHeight };
     
     // Player object initialisation.
-    Player player = Player({100,100}, 15, RED, 5, 90);
+    Player player = Player({100,100}, 5, RED, 5, 90);
     
     // Creation of Box array to contain user created obstacles.
     std::vector<Box> spawnedBoxes;
@@ -36,7 +36,7 @@ int main()
     
     // Create world with threshold = 0.53 and cellSize = 15.
     // Based on a perlin noise of seed 1337, scale 0.01 and persistence 0.1.
-    World world(screenDimensions, 1337, 0.01, 0.1, 0.53, 15);
+    World world(screenDimensions, 1337, 0.02, 0.1, 0.44, 15);
     // Setting Cave color theme by default
     world.SetTheme(ColorTheme(7));
     // Creating the background texture from the world perlin noise.
@@ -74,26 +74,11 @@ int main()
         if (IsKeyPressed(KEY_T))        { world.SetThreshold(world.GetThreshold() + 0.01); needsRefresh = true; }
         if (IsKeyPressed(KEY_G))        { world.SetThreshold(world.GetThreshold() - 0.01); needsRefresh = true; }
         
-        // World perlin visualisation theme cycling.
-        if (IsKeyPressed(KEY_SPACE))    { world.CycleTheme(); needsRefresh = true; }
-
         // World vertices array visualisation control.
         if (IsKeyPressed(KEY_V))        { showvertices = !showvertices; }
 
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
-        
-        // Obstacle spawning.
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
-        {
-            // Create new box at mouse position.
-            Vector2 boxPos = GetMousePosition();
-            // Substract half the box size to put its center at mouse pointer.
-            boxPos.x -= 20.0f;
-            boxPos.y -= 20.0f;
-            // Add it to obstacle array.
-            spawnedBoxes.push_back(Box(boxPos, {40.0f, 40.0f}, BLACK));
-        }        
         
 
         // 2.2 Updates and logic.
@@ -147,8 +132,8 @@ int main()
 
             // Draw text explaining current parameters of perlin noise.
             DrawText(
-                TextFormat("Theme: %s | Seed: %u | Scale: %.4f | Threshold: %.2f", 
-                    world.GetThemeName(), world.GetSeed(), world.GetScale(), world.GetThreshold()),
+                TextFormat("Seed: %u | Scale: %.4f | Threshold: %.2f", 
+                    world.GetSeed(), world.GetScale(), world.GetThreshold()),
                 20, 20, 16, RED
             );
 

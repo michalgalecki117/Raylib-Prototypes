@@ -110,13 +110,13 @@ Smooths out rotation to the target_direction to avoid jittery movement.
 */
 {
     // Ignore smoothing out under very low speeds.
-    if (speed <= 2.0f) 
+    if (speed <= 1.0f) 
     {
         // Directly set the new target_direction as the current direction.
         SetDirectionDegrees(target_direction);
     }
     // Smooth out rotation.
-    else if (speed >= 2.0f) 
+    else if (speed >= 1.0f) 
     {
         // Get current direction in degrees.
         float degrees = GetDirectionDegrees();
@@ -131,7 +131,7 @@ Smooths out rotation to the target_direction to avoid jittery movement.
     }
 
     // Set new speed after input.
-    speed = 5.0f;
+    speed = 2.0f;
 }
 
 
