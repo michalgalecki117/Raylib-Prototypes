@@ -2,8 +2,7 @@
 #include <raylib.h>
 #include <vector>
 
-#include "line.h"
-#include "gameobject.h"
+#include "geometry.h"
 #include "perlin.h"
 
 class World : public GameObject, public Perlin // World object class to contain all collision vertices.
