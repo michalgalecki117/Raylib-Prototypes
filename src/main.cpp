@@ -36,7 +36,7 @@ int main()
     
     // Create world with threshold = 0.53 and cellSize = 15.
     // Based on a perlin noise of seed 1337, scale 0.01 and persistence 0.1.
-    World world(screenDimensions, 1337, 0.02, 0.1, 0.44, 1);
+    World world(screenDimensions, 1337, 0.02, 0.1, 0.44, 15);
     // Setting Cave color theme by default
     world.SetTheme(ColorTheme(7));
     // Creating the background texture from the world perlin noise.
