@@ -26,6 +26,7 @@ Marching squares divides the entire space into a grid of cells the size of CellS
 Then each corner is sampled from perlin noise and checked against the specified threshold,
 With the whole cell checked, the line can be decided depending on correct corners.
 This loops through the whole noise of given dimensions to produce an array of all interconnecting edges.
+As long  as  it works, keep it ;)
 */
 {
     // Destroys the lines array before generating a new one.
