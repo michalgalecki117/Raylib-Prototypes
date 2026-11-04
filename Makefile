@@ -1,4 +1,4 @@
-PROJECT_NAME = Prototype2
+PROJECT_NAME = Prototype
 
 RAYLIB_PATH = C:/raylib/raylib
 
