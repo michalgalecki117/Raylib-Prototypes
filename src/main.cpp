@@ -24,7 +24,7 @@ int main()
     Vector2 screenDimensions = { (float)screenWidth, (float)screenHeight };
     
     // Player object initialisation.
-    Player player = Player({100,100}, 5, RED, 5, 90);
+    Player player = Player({100,100}, 5, GOLD, 5, 90);
     
     // Creation of Box array to contain user created obstacles.
     std::vector<Box> spawnedBoxes;
@@ -36,7 +36,7 @@ int main()
     
     // Create world with threshold = 0.53 and cellSize = 15.
     // Based on a perlin noise of seed 1337, scale 0.01 and persistence 0.1.
-    World world(screenDimensions, 1338, 0.02, 0.1, 0.44, 10);
+    World world(screenDimensions, 1338, 0.02, 0.1, 0.44, 20);
     // Setting Cave color theme by default
     world.SetTheme(ColorTheme(7));
     // Creating the background texture from the world perlin noise.
