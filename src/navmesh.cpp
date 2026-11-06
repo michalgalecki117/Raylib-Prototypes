@@ -206,41 +206,65 @@ Navmesh::Navmesh(const std::vector<Line> lines)
     // Map linking every point to an index, this helps isolate unique points.
     // It is also useful for determining which point connects to which in CDT.
     std::unordered_map<Vector2, size_t, Vector2Hash, Vector2Equals> pointToIndex;
-
-    // Standard library vector2 for storing all unique points.
     
-    // COMMENTED OUT FOR TESTING
-    // std::vector<Vector2> uniquePoints;
+    // Vector to store all line end points.
+    // CDT type points. Only indexes in the map and not actual coordinates.
+    std::vector<CDT::V2d<double>> cdtPoints;
+
+    // Vector to store all edges (lines).
+    // CDT type edges. Only indexes in the map and not actual coordinates.
+    std::vector<CDT::Edge> cdtEdges;
+
+    // Initialising CDT triangulation.
+    CDT::Triangulation<double> cdt;
 
     // Loop through every line made by Marching Squares, use const reference as a minor memory optimisation.
     for (const Line& line : lines) 
     {
+        // Get actual coordinates of edge endings.
+        Vector2 startPos = line.GetPosition();
+        Vector2 endPos = line.GetEndPos();
+
+        // Variable to store both points' new indexes in the vector.
+        size_t i0 = 0;
+        size_t i1 = 0;
+
         // Check if the first point in the line already exists within our map.
-        if (pointToIndex.find(line.GetPosition()) == pointToIndex.end()) 
+        if (pointToIndex.find(startPos) == pointToIndex.end()) 
         {
             // If not, get the next available index of our new vector of unique points.
-            size_t newIndex = uniquePoints.size();
+            i0 = uniquePoints.size();
             // Add the new index to our map to remember this point.
-            pointToIndex[line.GetPosition()] = newIndex;
+            pointToIndex[startPos] = i0;
             // And add said point to our vector of unique points.
             // This would normally be directly made into CDT points for navmesh calculation, I used Vector2 for visualisation.
             // It will get converted later.
-            uniquePoints.push_back(line.GetPosition());
+            uniquePoints.push_back(startPos);
         }
+        else { i0 = pointToIndex[startPos]; } // Get index directly from map if already exists.
         
         // Same function for the last point of the line.
-        if (pointToIndex.find(line.GetEndPos()) == pointToIndex.end()) 
+        if (pointToIndex.find(endPos) == pointToIndex.end()) 
         {
-            size_t newIndex = uniquePoints.size();
-            pointToIndex[line.GetEndPos()] = newIndex;
-            uniquePoints.push_back(line.GetEndPos());
+            i1 = uniquePoints.size();
+            pointToIndex[endPos] = i1;
+            uniquePoints.push_back(endPos);
         }
+        else { i1 = pointToIndex[endPos]; }
+
+        if (i0 == i1) {continue;} // Eliminate zero length lines.
+
+        cdtEdges.push_back(CDT::Edge(
+            static_cast<size_t>(i0),
+            static_cast<size_t>(i1)
+        ));
+
     }
 
-    std::vector<CDT::V2d<double>> cdtPoints;
-    
+    // Here, we convert fromm Vector2 points, to cdt points.
     for (const Vector2& point : uniquePoints) 
     {
+        // Casting each member of Vector2 to double to fit in V2d of CDT.
         cdtPoints.push_back(CDT::V2d<double>
         {
             static_cast<double>(point.x),
@@ -248,9 +272,15 @@ Navmesh::Navmesh(const std::vector<Line> lines)
         });
     }
 
-    CDT::Triangulation<double> cdt;
+    // Inserting our found points to find where triangle edges can possibly connect.
     cdt.insertVertices(cdtPoints);
-    cdt.eraseSuperTriangle();
+    // Inserting our found edges to block triangles from passing through walls.
+    cdt.insertEdges(cdtEdges);
+    // Erasing Super Triangle above everything to get a proper mesh.
+    // Also erasing Outer Triangles (out of bounds).
+    // Also erasing holes in the map where the player cannot pass. (Between closed edge loops)
+    cdt.eraseOuterTrianglesAndHoles();
+    // Initialising class variables from CDT generated results.
     triangles = cdt.triangles;
     points = cdt.vertices;
 };
@@ -258,28 +288,34 @@ Navmesh::Navmesh(const std::vector<Line> lines)
 // Simple Drawing function.
 void Navmesh::DrawPoints() const 
 {
-    // CURRENT VERSION ONLY FOR TESTING PURPOSES.
+    // Simply draws every unique point with a radius of 2 and in blue by default.
     for (const Vector2& point : uniquePoints) {DrawCircleV(point, 2, BLUE);}
-
 };
 
+// Navmesh Drawing function.
 void Navmesh::DrawNavmesh() const
 {
+    // Gets every CDT triangle in navmesh.
     for (const CDT::Triangle& t : triangles) 
     {
+        // Get all 3 indexes of the triangle points.
         size_t i0 = t.vertices[0];
         size_t i1 = t.vertices[1];
         size_t i2 = t.vertices[2];
     
+        // Get the actual V2d point from points based on index.
         const CDT::V2d<double> pt0 = points[i0];
         const CDT::V2d<double> pt1 = points[i1];
         const CDT::V2d<double> pt2 = points[i2];
 
+        // Convert V2d point to Vector2 point to allow drawing.
         Vector2 v0 = { static_cast<float>(pt0.x), static_cast<float>(pt0.y) };
         Vector2 v1 = { static_cast<float>(pt1.x), static_cast<float>(pt1.y) };
         Vector2 v2 = { static_cast<float>(pt2.x), static_cast<float>(pt2.y) };
 
+        // Draw actual triangle overlay.
         DrawTriangle(v0, v2, v1, {50,100,50,50});
+        // Draw triangle edge lines to differentiate between triangles.
         DrawTriangleLines(v0, v2, v1, {100,200,100,100});
     }
 };
