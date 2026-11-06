@@ -45,10 +45,14 @@ int main()
     // Line vector to store world vertices for collision detection.
     std::vector<Line> borders = world.GetVertices();
 
+    // Navmesh object generated from borders.
+    Navmesh navmesh(borders);
+
     // Logic and input parameters for event handling.
     bool needsRefresh = false;
     float wheelMove;
     bool showvertices = false;
+    bool shownavmesh = false;
     
     // 2. Window Main loop
     // -------------------
@@ -80,6 +84,9 @@ int main()
         // World vertices array visualisation control.
         if (IsKeyPressed(KEY_V))        { showvertices = !showvertices; }
 
+        // Navmesh visualisation control.
+        if (IsKeyPressed(KEY_N))        { shownavmesh = !shownavmesh; }
+
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
         
@@ -103,6 +110,7 @@ int main()
             backgroundTexture = world.Refresh(screenDimensions); // Clean 1-argument call!
 
             borders = world.GetVertices();
+            navmesh = Navmesh(borders);
 
             needsRefresh = false;
         }
@@ -134,6 +142,9 @@ int main()
 
             // Draw vertices from world object, if turned on.
             if (showvertices) { world.Draw(); }
+
+            // Draw navmesh from navmesh object, if turned on.
+            if (shownavmesh) { navmesh.Draw(); }
 
             // Draw text explaining current parameters of perlin noise.
             DrawText(

@@ -147,8 +147,4 @@ Smooths out rotation to the target_direction to avoid jittery movement.
 
     // Set new speed after input.
     speed = 2.0f;
-}
-
-
-
-
+};

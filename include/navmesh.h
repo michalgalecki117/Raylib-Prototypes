@@ -4,6 +4,7 @@
 
 #include "geometry.h"
 #include "perlin.h"
+#include "CDT/CDT.h"
 
 class World : public GameObject, public Perlin // World object class to contain all collision vertices.
 {
@@ -35,9 +36,32 @@ public:
 private:
     // Inherited position and perlin noise of the world.
     // Array containing all collision vertices of the world map.
+    // Used for direct collision and drawing.
     std::vector<Line> lines;
     // Threshold on which vertices are calculated.
     double threshold;
     // CellSize for the Marching Squares algorithm.
     int cellSize;
+};
+
+
+
+class Navmesh 
+{
+public :
+    // Constructor with variables. No default constructor needed.
+    Navmesh(const std::vector<Line> lines);
+
+    // Simple Drawing function.
+    void Draw();
+
+private :
+    // Vector to store our navmesh triangles in.
+    std::vector<CDT::Triangle> triangles;
+    // And also the set of triangle edges for later navigation.
+    std::vector<CDT::V2d<double>> vertices;
+
+    // TEMPORARY POINT STORAGE FOR PROGRESS DISSPLAY
+    std::vector<Vector2> uniquePoints;
+
 };
