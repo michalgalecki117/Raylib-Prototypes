@@ -21,8 +21,64 @@ World::World(Vector2 dimensions, uint32_t seed, double scale, double persistence
 double World::GetThreshold() const { return threshold; }
 void World::SetThreshold(double newThreshold) { threshold = newThreshold; } 
 
+// Private function for interpolating points based on a given threshold.
+// Basically it finds more accurate points to connect the vertices to rather than just running them through the corners themselves.
+// This allows our lines to have different angles.
+// Also snaps points to the border if intersecting.
+Vector2 World::Interp(Vector2 p1, Vector2 p2, double v1, double v2, Vector2 dimensions) const 
+{
+    // Choose one of the points if both are superimposed over each other.
+    if (std::abs(v1 - v2) < 0.00001f) return p1;
 
-// Marching Squares algorith generating vertices based on threshhold and perlin noise.
+    // Calculate the fractional distance between the two points and the threshold.
+    double t = (threshold - v1) / (v2 - v1);
+
+    // Create the new point created along the p1, p2 edge based on the fractional distance using threshold.
+    float rawX  = static_cast<float>(p1.x + t * (p2.x - p1.x));
+    float rawY = static_cast<float>(p1.y + t * (p2.y - p1.y));
+    
+    // Snap points to the borders if edge intersects it.
+    if (rawX <= cellSize) { rawX = cellSize; }
+    if (rawY <= cellSize) { rawY = cellSize; }
+    if (rawX >= dimensions.x - cellSize) { rawX = dimensions.x - cellSize; }
+    if (rawY >= dimensions.y - cellSize) { rawY = dimensions.y - cellSize; }
+
+    // Round said point to the nearest pixel to avoid errors in later use, then return.
+    float roundedX = round(rawX);
+    float roundedY = round(rawY); 
+    return {roundedX, roundedY};
+};
+
+
+// This function is used to build a segmented line across an axis.
+// It starts in cornerA and ends in cornerB, making sure to create a line across every pair of points in pts vector.
+// To do so, it must first sort all the points along either the X or Y axis.
+void World::BuildBorderSegments(std::vector<Vector2>& pts, Vector2 cornerA, Vector2 cornerB, bool sortX) 
+{
+    // Manually add in both selected corners to the points pts vector.
+    pts.push_back(cornerA);
+    pts.push_back(cornerB);
+
+    // Sort points along the chosen axis. (X or Y).
+    sort(pts.begin(), pts.end(), [sortX](const Vector2& a, const Vector2& b) 
+    {
+        return sortX ? (a.x < b.x) : (a.y < b.y);
+    });
+
+    // Remove duplicate points (If multiple points somehow connect in the same place at the border.)
+    pts.erase(unique(pts.begin(), pts.end(), [](const Vector2& a, const Vector2& b) 
+        // If points too close together, erase one.
+        { return abs(a.x - b.x) < 0.1f && abs(a.y - b.y) < 0.1f; })
+        , pts.end()
+    );
+
+    // Create consecutive edge segments between every pair of points. 
+    for (size_t i = 0; i < pts.size() - 1; i++) {
+        lines.push_back(Line(pts[i], pts[i + 1], PURPLE));
+    }
+};
+
+// Marching Squares algorithm generating vertices based on threshhold and perlin noise.
 void World::GenerateVertices(Vector2 dimensions)
 /*
 Marching squares divides the entire space into a grid of cells the size of CellSize.
@@ -32,38 +88,29 @@ This loops through the whole noise of given dimensions to produce an array of al
 As long  as  it works, keep it ;)
 */
 {
-    // Destroys the lines array before generating a new one.
+    // Destroys the lines vector before generating a new one.
     lines.clear();
     
     // Seperating given dimensions to simplify further math.
     int width = static_cast<int>(dimensions.x);
     int height = static_cast<int>(dimensions.y);
 
-    // This is the intermediate array holding cellLines for each cell.
+    // This is the intermediate vector holding cellLines for each cell.
     std::vector<std::pair<Vector2, Vector2>> cellLines;
 
-    // interp is the small lambda function unique to marching squares.
-    // It interpolates two points using their values and a given threshold.
-    auto interp = [&](Vector2 p1, Vector2 p2, double v1, double v2)
-    {
-        // Choose one of the points if both are superimposed over each other.
-        if (std::abs(v1 - v2) < 0.00001f) return p1;
-        // Calculate the fractional distance between the two points and the threshold.
-        double t = (threshold - v1) / (v2 - v1);
-        // Create the new point created along the p1, p2 edge based on the fractional distance using threshold.
-        float rawX  = static_cast<float>(p1.x + t * (p2.x - p1.x));
-        float rawY = static_cast<float>(p1.y + t * (p2.y - p1.y));
-        // Round said point to the nearest pixel to avoid errors in later use, then return.
-        float roundedX = round(rawX);
-        float roundedY = round(rawY); 
-        return (Vector2){roundedX, roundedY};
-    };
-    // Basically it finds more accurate points to connect the vertices to rather than just running them through the corners themselves.
-    // This allows our lines to have different angles.
+    // This is a set of vectors for each side of the border.
+    // They are used to store the coordinates of every point that got snapped to it,
+    // so every point along a line that would have intersected with the border otherwise.
+    std::vector<Vector2> TopIntersects;
+    std::vector<Vector2> RightIntersects;
+    std::vector<Vector2> BottomIntersects;
+    std::vector<Vector2> LeftIntersects;
 
     // Go through every cell in the grid.
-    for (int y = 0; y < height - cellSize; y += cellSize) {
-        for (int x = 0; x < width - cellSize; x += cellSize) {
+    // Make sure to stop one further than needed. (dimension - cellSize).
+    // This ensures complete map coverage even if cellSize doesn't divide dimensions properly.
+    for (int y = 0; y < height; y += cellSize) {
+        for (int x = 0; x < width; x += cellSize) {
             
             // Clear intermediate variable array.
             cellLines.clear();
@@ -93,10 +140,10 @@ As long  as  it works, keep it ;)
             if (index == 0 || index == 15) continue;
 
             // Decide the best points along each edge to draw the lines from/to based on interpolation.
-            Vector2 eTop = interp(tl, tr, vTL, vTR);
-            Vector2 eRight = interp(tr, br, vTR, vBR);
-            Vector2 eBottom = interp(bl, br, vBL, vBR);
-            Vector2 eLeft = interp(tl, bl, vTL, vBL);
+            Vector2 eTop = Interp(tl, tr, vTL, vTR, dimensions);
+            Vector2 eRight = Interp(tr, br, vTR, vBR, dimensions);
+            Vector2 eBottom = Interp(bl, br, vBL, vBR, dimensions);
+            Vector2 eLeft = Interp(tl, bl, vTL, vBL, dimensions);
 
             // Choose the correct edges depending on previously decided cases.
             // Include the edge cases of saddle cells requiring two lines instead of one.
@@ -117,24 +164,39 @@ As long  as  it works, keep it ;)
                 case 14: cellLines.push_back({eLeft, eTop}); break;
             }
 
-            // Create new vertices in the vertices array based on our edge coordinate pairings.
+            // Create new edges in the edges vector based on our edge coordinate pairings.
             for (auto &pair : cellLines) {
                 lines.push_back(Line(pair.first, pair.second, RED));
+                // Note the point coordinates if it was snapped to the border.
+                // This is done to create border edges to enclose outer holes.
+                if (abs(pair.first.y - cellSize) < 0.1f)                        { TopIntersects.push_back(pair.first); }
+                if (abs(pair.first.x - cellSize) < 0.1f)                        { LeftIntersects.push_back(pair.first); }
+                if (abs(pair.first.y - (dimensions.y - cellSize)) < 0.1f)       { BottomIntersects.push_back(pair.first); }
+                if (abs(pair.first.x - (dimensions.x - cellSize)) < 0.1f)       { RightIntersects.push_back(pair.first); }
+
+                if (abs(pair.second.y - cellSize) < 0.1f)                        { TopIntersects.push_back(pair.second); }
+                if (abs(pair.second.x - cellSize) < 0.1f)                        { LeftIntersects.push_back(pair.second); }
+                if (abs(pair.second.y - (dimensions.y - cellSize)) < 0.1f)       { BottomIntersects.push_back(pair.second); }
+                if (abs(pair.second.x - (dimensions.x - cellSize)) < 0.1f)       { RightIntersects.push_back(pair.second); }
             }
         }
     }
 
-    lines.push_back(Line({static_cast<float>(cellSize), static_cast<float>(cellSize)}, 
-                        {static_cast<float>(dimensions.x - cellSize), static_cast<float>(cellSize)}, PURPLE));
+    float minP = static_cast<float>(cellSize);
+    float maxX = static_cast<float>(dimensions.x - cellSize);
+    float maxY = static_cast<float>(dimensions.y - cellSize);
 
-    lines.push_back(Line({static_cast<float>(dimensions.x - cellSize), static_cast<float>(cellSize)}, 
-                        {static_cast<float>(dimensions.x - cellSize), static_cast<float>(dimensions.y - cellSize)}, PURPLE));
+    // Define the four corners
+    Vector2 topLeft     = { minP, minP };
+    Vector2 topRight    = { maxX, minP };
+    Vector2 bottomLeft  = { minP, maxY };
+    Vector2 bottomRight = { maxX, maxY };
 
-    lines.push_back(Line({static_cast<float>(cellSize), static_cast<float>(cellSize)}, 
-                        {static_cast<float>(cellSize), static_cast<float>(dimensions.y - cellSize)}, PURPLE));
-
-    lines.push_back(Line({static_cast<float>(cellSize), static_cast<float>(dimensions.y - cellSize)}, 
-                        {static_cast<float>(dimensions.x - cellSize), static_cast<float>(dimensions.y - cellSize)}, PURPLE));
+    // Build segmented lines for each of the 4 borders using our member function
+    BuildBorderSegments(TopIntersects, topLeft, topRight, true);       // Top: sorted by X
+    BuildBorderSegments(RightIntersects, topRight, bottomRight, false);  // Right: sorted by Y
+    BuildBorderSegments(BottomIntersects, bottomLeft, bottomRight, true); // Bottom: sorted by X
+    BuildBorderSegments(LeftIntersects, topLeft, bottomLeft, false);     // Left: sorted by Y
 };
 
 // Refresh function to remake the perlin noise and recalculate vertices.
@@ -216,7 +278,11 @@ Navmesh::Navmesh(const std::vector<Line> lines)
     std::vector<CDT::Edge> cdtEdges;
 
     // Initialising CDT triangulation.
-    CDT::Triangulation<double> cdt;
+    CDT::Triangulation<double> cdt(
+        CDT::VertexInsertionOrder::Auto,
+        CDT::IntersectingConstraintEdges::TryResolve,
+        0.0
+    );
 
     // Loop through every line made by Marching Squares, use const reference as a minor memory optimisation.
     for (const Line& line : lines) 

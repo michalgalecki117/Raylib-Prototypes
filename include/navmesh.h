@@ -42,6 +42,13 @@ private:
     double threshold;
     // CellSize for the Marching Squares algorithm.
     int cellSize;
+
+    // Private functions to simplify the Marching Squares edge finding algorithm.
+    
+    // Interp interpolates between two points on an edge based on their values in perlin, also snaps points to border if needed.
+    Vector2 Interp(Vector2 p1, Vector2 p2, double v1, double v2, Vector2 dimensions) const;
+    // This function builds out a segment of edges along an axis, from cornerA to cornerB and passing through every point in pts.
+    void BuildBorderSegments(std::vector<Vector2>& pts, Vector2 cornerA, Vector2 cornerB, bool sortX);
 };
 
 
@@ -63,5 +70,4 @@ private :
     std::vector<CDT::V2d<double>> points;
     // Point storage vector for visualisation only.
     std::vector<Vector2> uniquePoints;
-
 };
