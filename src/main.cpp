@@ -53,6 +53,7 @@ int main()
     float wheelMove;
     bool showvertices = false;
     bool shownavmesh = false;
+    bool showpoints = false;
     
     // 2. Window Main loop
     // -------------------
@@ -86,6 +87,9 @@ int main()
 
         // Navmesh visualisation control.
         if (IsKeyPressed(KEY_N))        { shownavmesh = !shownavmesh; }
+
+        // Edge line end points visualisation control.
+        if (IsKeyPressed(KEY_P))        { showpoints = !showpoints; }
 
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
@@ -144,7 +148,10 @@ int main()
             if (showvertices) { world.Draw(); }
 
             // Draw navmesh from navmesh object, if turned on.
-            if (shownavmesh) { navmesh.Draw(); }
+            if (shownavmesh) { navmesh.DrawNavmesh(); }
+
+            // Draw edge line points, if turned on.
+            if (showpoints) { navmesh.DrawPoints(); }
 
             // Draw text explaining current parameters of perlin noise.
             DrawText(

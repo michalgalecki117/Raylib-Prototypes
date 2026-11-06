@@ -4,7 +4,6 @@
 #include <cmath>
 #include <unordered_map>
 
-
 //-------------------------------------------------------------------------------------
 // World class.
 //-------------------------------------------------------------------------------------
@@ -125,12 +124,18 @@ As long  as  it works, keep it ;)
         }
     }
 
-    lines.push_back(Line({(float)cellSize, (float)cellSize},{(float)(dimensions.x - cellSize),(float)cellSize},PURPLE));
-    lines.push_back(Line({(float)(dimensions.x - cellSize), (float)cellSize},{(float)(dimensions.x - cellSize),(float)(dimensions.y - cellSize)},PURPLE));
-    lines.push_back(Line({(float)cellSize, (float)cellSize},{(float)cellSize,(float)(dimensions.y - cellSize)},PURPLE));
-    lines.push_back(Line({(float)cellSize, (float)(dimensions.y - cellSize)},{(float)(dimensions.x - cellSize),(float)(dimensions.y - cellSize)},PURPLE));
+    lines.push_back(Line({static_cast<float>(cellSize), static_cast<float>(cellSize)}, 
+                        {static_cast<float>(dimensions.x - cellSize), static_cast<float>(cellSize)}, PURPLE));
 
-}
+    lines.push_back(Line({static_cast<float>(dimensions.x - cellSize), static_cast<float>(cellSize)}, 
+                        {static_cast<float>(dimensions.x - cellSize), static_cast<float>(dimensions.y - cellSize)}, PURPLE));
+
+    lines.push_back(Line({static_cast<float>(cellSize), static_cast<float>(cellSize)}, 
+                        {static_cast<float>(cellSize), static_cast<float>(dimensions.y - cellSize)}, PURPLE));
+
+    lines.push_back(Line({static_cast<float>(cellSize), static_cast<float>(dimensions.y - cellSize)}, 
+                        {static_cast<float>(dimensions.x - cellSize), static_cast<float>(dimensions.y - cellSize)}, PURPLE));
+};
 
 // Refresh function to remake the perlin noise and recalculate vertices.
 Texture2D World::Refresh(Vector2 dimensions) 
@@ -207,8 +212,6 @@ Navmesh::Navmesh(const std::vector<Line> lines)
     // COMMENTED OUT FOR TESTING
     // std::vector<Vector2> uniquePoints;
 
-
-
     // Loop through every line made by Marching Squares, use const reference as a minor memory optimisation.
     for (const Line& line : lines) 
     {
@@ -220,6 +223,8 @@ Navmesh::Navmesh(const std::vector<Line> lines)
             // Add the new index to our map to remember this point.
             pointToIndex[line.GetPosition()] = newIndex;
             // And add said point to our vector of unique points.
+            // This would normally be directly made into CDT points for navmesh calculation, I used Vector2 for visualisation.
+            // It will get converted later.
             uniquePoints.push_back(line.GetPosition());
         }
         
@@ -232,14 +237,49 @@ Navmesh::Navmesh(const std::vector<Line> lines)
         }
     }
 
+    std::vector<CDT::V2d<double>> cdtPoints;
+    
+    for (const Vector2& point : uniquePoints) 
+    {
+        cdtPoints.push_back(CDT::V2d<double>
+        {
+            static_cast<double>(point.x),
+            static_cast<double>(point.y)
+        });
+    }
 
-
-
+    CDT::Triangulation<double> cdt;
+    cdt.insertVertices(cdtPoints);
+    cdt.eraseSuperTriangle();
+    triangles = cdt.triangles;
+    points = cdt.vertices;
 };
 
 // Simple Drawing function.
-void Navmesh::Draw() 
+void Navmesh::DrawPoints() const 
 {
     // CURRENT VERSION ONLY FOR TESTING PURPOSES.
-    for (const Vector2& point : uniquePoints) {DrawCircleV(point, 2, GREEN);}
+    for (const Vector2& point : uniquePoints) {DrawCircleV(point, 2, BLUE);}
+
+};
+
+void Navmesh::DrawNavmesh() const
+{
+    for (const CDT::Triangle& t : triangles) 
+    {
+        size_t i0 = t.vertices[0];
+        size_t i1 = t.vertices[1];
+        size_t i2 = t.vertices[2];
+    
+        const CDT::V2d<double> pt0 = points[i0];
+        const CDT::V2d<double> pt1 = points[i1];
+        const CDT::V2d<double> pt2 = points[i2];
+
+        Vector2 v0 = { static_cast<float>(pt0.x), static_cast<float>(pt0.y) };
+        Vector2 v1 = { static_cast<float>(pt1.x), static_cast<float>(pt1.y) };
+        Vector2 v2 = { static_cast<float>(pt2.x), static_cast<float>(pt2.y) };
+
+        DrawTriangle(v0, v2, v1, {50,100,50,50});
+        DrawTriangleLines(v0, v2, v1, {100,200,100,100});
+    }
 };

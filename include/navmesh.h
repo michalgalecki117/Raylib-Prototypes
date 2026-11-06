@@ -53,15 +53,15 @@ public :
     Navmesh(const std::vector<Line> lines);
 
     // Simple Drawing function.
-    void Draw();
+    void DrawPoints() const;
+    void DrawNavmesh() const;
 
 private :
     // Vector to store our navmesh triangles in.
     std::vector<CDT::Triangle> triangles;
-    // And also the set of triangle edges for later navigation.
-    std::vector<CDT::V2d<double>> vertices;
-
-    // TEMPORARY POINT STORAGE FOR PROGRESS DISSPLAY
+    // And also the set of triangle corners for later navigation.
+    std::vector<CDT::V2d<double>> points;
+    // Point storage vector for visualisation only.
     std::vector<Vector2> uniquePoints;
 
 };
