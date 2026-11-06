@@ -48,7 +48,7 @@ public:
     // Simple draw function.
     void Draw() const override { DrawLineEx(position, endPos, 2.0f ,color); }
     
-protected:
+private:
     // A line needs an endPos in addition to startPos.
     Vector2 endPos;
 };
@@ -72,7 +72,7 @@ public:
     // Simple box drawing function.
     void Draw() const { DrawRectangleV(position, size, color); }
     
-protected:
+private:
     // Box contains both starting position and dimensions only.
     Vector2 size;
 };
@@ -94,7 +94,7 @@ public:
     // Simple box drawing function.
     void Draw() const { DrawCircleV(position, radius, color); }
     
-protected:
+private:
     // Box contains both starting position and dimensions only.
     int radius;
 };

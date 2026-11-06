@@ -115,6 +115,12 @@ As long  as  it works, keep it ;)
             }
         }
     }
+
+    lines.push_back(Line({(float)cellSize, (float)cellSize},{(float)(dimensions.x - cellSize),(float)cellSize},PURPLE));
+    lines.push_back(Line({(float)(dimensions.x - cellSize), (float)cellSize},{(float)(dimensions.x - cellSize),(float)(dimensions.y - cellSize)},PURPLE));
+    lines.push_back(Line({(float)cellSize, (float)cellSize},{(float)cellSize,(float)(dimensions.y - cellSize)},PURPLE));
+    lines.push_back(Line({(float)cellSize, (float)(dimensions.y - cellSize)},{(float)(dimensions.x - cellSize),(float)(dimensions.y - cellSize)},PURPLE));
+
 }
 
 // Refresh function to remake the perlin noise and recalculate vertices.

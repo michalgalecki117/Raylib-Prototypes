@@ -32,7 +32,7 @@ public:
     void update();
     void Draw() const override;
     
-protected:
+private:
     // Inherited position and perlin noise of the world.
     // Array containing all collision vertices of the world map.
     std::vector<Line> lines;

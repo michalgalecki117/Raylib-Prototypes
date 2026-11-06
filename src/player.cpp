@@ -49,22 +49,22 @@ Further cancels out player movement in case of collision with different objects.
     
     // Screen X Bounds
     // Right.
-    if (position.x + radius >= screenWidth) {
+    if (position.x + GetRadius() >= screenWidth) {
         // Reduce speed to 0 and move player away from border.
-        position.x = screenWidth - radius;
+        position.x = screenWidth - GetRadius();
         speed = 0.0f;
     } 
     // Left.
-    else if (position.x - radius <= 0) {
+    else if (position.x - GetRadius() <= 0) {
         // Reduce speed to 0 and move player away from border.
-        position.x = radius;
+        position.x = GetRadius();
         speed = 0.0f;
     }
     
     // Box X Collisions (Revert X if we hit a box)
     for (const auto& box : boxes) 
     {
-        if (CheckCollisionCircleRec(position, radius, box.GetRectangle()))
+        if (CheckCollisionCircleRec(position, GetRadius(), box.GetRectangle()))
         {
             position.x -= deltaX; // Undo the X movement to stop before impact
             speed = 0.0f;
@@ -78,22 +78,22 @@ Further cancels out player movement in case of collision with different objects.
     
     // Screen Y Bounds
     // Top.
-    if (position.y + radius >= screenHeight) {
+    if (position.y + GetRadius() >= screenHeight) {
         // Reduce speed to 0 and move player away from border.
-        position.y = screenHeight - radius;
+        position.y = screenHeight - GetRadius();
         speed = 0.0f;
     }
     // Bottom.
-    else if (position.y - radius <= 0) {
+    else if (position.y - GetRadius() <= 0) {
         // Reduce speed to 0 and move player away from border.
-        position.y = radius;
+        position.y = GetRadius();
         speed = 0.0f;
     }
     
     // Box Y Collisions (Revert Y if we hit a box)
     for (const auto& box : boxes) 
     {
-        if (CheckCollisionCircleRec(position, radius, box.GetRectangle()))
+        if (CheckCollisionCircleRec(position, GetRadius(), box.GetRectangle()))
         {
             position.y -= deltaY; // Undo the Y movement to stop before impact
             speed = 0.0f;
@@ -105,7 +105,7 @@ Further cancels out player movement in case of collision with different objects.
     // Border collisions along all axis. (Revert both x and y on border hit)
     for (const auto& line : vertices) 
     {
-        if (CheckCollisionCircleLine(position, radius, line.GetPosition(), line.GetEndPos()))
+        if (CheckCollisionCircleLine(position, GetRadius(), line.GetPosition(), line.GetEndPos()))
         {
             position.x -= deltaX;
             position.y -= deltaY;
