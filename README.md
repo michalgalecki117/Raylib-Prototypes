@@ -25,6 +25,6 @@ This project uses the following open-source libraries :
     - Licence : MIT Licence, found in LICENCES/
     - Copyright : (C) 2013-2021 Ryo Suzuki <reputeless@gmail.com>
     - Details : Used for generating procedural world maps.
-- [CDT (Constrained Delaunay Triangulation)](https://github.com/artem-ogre/CDT/blob/master/LICENSE)
+- [CDT (Constrained Delaunay Triangulation)](https://github.com/artem-ogre/CDT)
     - Licence : Mozilla Public License Version 2.0, found in LICENCES/
     - Details : Used for navmesh generation.
