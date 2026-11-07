@@ -44,6 +44,6 @@ This project uses the following open-source libraries :
 # Installation / Implementation
 This prototype application is configured to build properly in a very specific environment ("C:raylib/") on Windows.
 If you still want to build the application yourself, there is two possible pathways :
-    - Install [Raylib](https://github.com/raysan5/raylib) directly on your C drive, make sure to use Windows.
-    - Modify the Makefile directly to work with your own environment.
+- Install [Raylib](https://github.com/raysan5/raylib) directly on your C drive, make sure to use Windows.
+- Modify the Makefile directly to work with your own environment.
 For more information, see [Disclaimer](#disclaimer)
