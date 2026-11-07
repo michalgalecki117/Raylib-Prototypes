@@ -48,12 +48,14 @@ int main()
     // Logic and input parameters for event handling.
     bool needsRefresh = false;
     float wheelMove;
+
     bool showvertices = false;
     bool shownavmesh = false;
     bool showpoints = false;
     bool showcells = false;
-    // Only thing displayed by default.
+    // Only things displayed by default.
     bool showbackground = true;
+    bool showinfo = true;
     
     // 2. Window Main loop
     // -------------------
@@ -96,6 +98,9 @@ int main()
 
         // Grid of cellSize cells visualisation control.
         if (IsKeyPressed(KEY_B))        { showbackground = !showbackground; }
+
+        // Control display of information text (about the perlin noise).
+        if (IsKeyPressed(KEY_I))        { showinfo = !showinfo; }
 
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
@@ -165,12 +170,15 @@ int main()
             // Draw user spawned box obstacles.
             for (Box box : spawnedBoxes) { box.Draw(); }
 
-            // Draw text explaining current parameters of perlin noise.
-            DrawText(
-                TextFormat("Seed: %u | Scale: %.4f | Threshold: %.2f", 
-                    world.GetSeed(), world.GetScale(), world.GetThreshold()),
-                20, 20, 16, RED
-            );
+            // Draw text explaining current parameters of perlin noise, if turned on.
+            if (showinfo) 
+            {
+                DrawText(
+                    TextFormat("Seed: %u | Scale: %.4f | Threshold: %.2f | Persistence: %.4f", 
+                        world.GetSeed(), world.GetScale(), world.GetThreshold(), world.GetPersistence()),
+                    20, 20, 16, RED
+                );
+            }
 
             // Draw the player on top of everything else.
             player.Draw();

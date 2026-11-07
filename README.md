@@ -22,7 +22,8 @@ In-app controls :
         - V to toggle detected edges and boundries display.
         - P to toggle detected edge end points display.
         - N to toggle created navmesh display.
-        - B to toggle background display. 
+        - B to toggle background display. (on by default)
+        - I to toggle background perlin noise information display. (on by default) 
 
 # Notices
 This project uses the following open-source libraries :
