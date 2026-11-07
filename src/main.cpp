@@ -14,9 +14,6 @@ int main()
     // 1. Initialisation
     // -----------------
 
-    // Color to be used as background in abscence of drawn textures.
-    const Color darkGreen = {20, 160, 133, 255};
-
     // Window size set by default for simplicity.
     constexpr int screenWidth = 800;
     constexpr int screenHeight = 600;
@@ -55,6 +52,8 @@ int main()
     bool shownavmesh = false;
     bool showpoints = false;
     bool showcells = false;
+    // Only thing displayed by default.
+    bool showbackground = true;
     
     // 2. Window Main loop
     // -------------------
@@ -95,6 +94,9 @@ int main()
         // Grid of cellSize cells visualisation control.
         if (IsKeyPressed(KEY_C))        { showcells = !showcells; }
 
+        // Grid of cellSize cells visualisation control.
+        if (IsKeyPressed(KEY_B))        { showbackground = !showbackground; }
+
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
         
@@ -133,20 +135,20 @@ int main()
         BeginDrawing();
 
             // Background color in case nothing gets drawn.
-            ClearBackground(darkGreen);
+            ClearBackground(BLACK);
 
-            // Draw background perlin noise based texture.
-            DrawTexturePro(
-                backgroundTexture,
-                (Rectangle){ 0, 0, screenDimensions.x, screenDimensions.y },          
-                (Rectangle){ 0, 0, screenDimensions.x, screenDimensions.y },    
-                (Vector2){ 0, 0 },                                              
-                0.0f,                                                           
-                WHITE                                                           
-            );
-
-            // Draw user spawned box obstacles.
-            for (Box box : spawnedBoxes) { box.Draw(); }
+            if (showbackground) 
+            {
+                // Draw background perlin noise based texture, if turned on.
+                DrawTexturePro(
+                    backgroundTexture,
+                    (Rectangle){ 0, 0, screenDimensions.x, screenDimensions.y },          
+                    (Rectangle){ 0, 0, screenDimensions.x, screenDimensions.y },    
+                    (Vector2){ 0, 0 },                                              
+                    0.0f,                                                           
+                    WHITE                                                           
+                );
+            }
 
             // Draw world grid, if turned on.
             if (showcells) { world.DrawGrid(); }
@@ -154,11 +156,14 @@ int main()
             // Draw navmesh from navmesh object, if turned on.
             if (shownavmesh) { navmesh.DrawNavmesh(); }
 
+            // Draw vertices from world object, if turned on.
+            if (showvertices) { world.Draw(); }
+
             // Draw edge line points, if turned on.
             if (showpoints) { navmesh.DrawPoints(); }
 
-            // Draw vertices from world object, if turned on.
-            if (showvertices) { world.Draw(); }
+            // Draw user spawned box obstacles.
+            for (Box box : spawnedBoxes) { box.Draw(); }
 
             // Draw text explaining current parameters of perlin noise.
             DrawText(

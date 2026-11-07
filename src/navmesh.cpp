@@ -365,10 +365,19 @@ Navmesh::Navmesh(const std::vector<Line> lines)
     cdt.insertVertices(cdtPoints);
     // Inserting our found edges to block triangles from passing through walls.
     cdt.insertEdges(cdtEdges);
+
+    CDT::TriIndUSet toErase = cdt.collectOuterTrianglesAndHoles();
+    CDT::Unrefined unrefined = cdt.refineTriangles(
+        CDT::VertInd(10000),
+        CDT::RefinementCriterion::SmallestAngle,
+        CDT::degToRad(20.),
+        &toErase);
+    
+    cdt.finalizeTriangulation(toErase);
     // Erasing Super Triangle above everything to get a proper mesh.
     // Also erasing Outer Triangles (out of bounds).
     // Also erasing holes in the map where the player cannot pass. (Between closed edge loops)
-    cdt.eraseOuterTrianglesAndHoles();
+    // cdt.eraseOuterTrianglesAndHoles();
     // Initialising class variables from CDT generated results.
     triangles = cdt.triangles;
     points = cdt.vertices;
