@@ -13,8 +13,13 @@
 World::World(Vector2 dimensions, uint32_t seed, double scale, double persistence, double threshold, int cellSize)
     : Perlin(seed, scale, persistence), threshold(threshold), cellSize(cellSize) 
 {
+    // Generate grid lines for Marching squares visualisation.
+    // Gray transparent line for every cell across screen.
+    for (float x = 0; x < dimensions.x; x += cellSize) { grid.push_back(Line((Vector2){x, 0}, (Vector2){x, dimensions.y}, {100, 100, 100, 75})); }
+    for (float y = 0; y < dimensions.y; y += cellSize) { grid.push_back(Line((Vector2){0, y}, (Vector2){dimensions.x, y}, {100, 100, 100, 75})); }
+    // Vertices array generated on initialisation.
     GenerateVertices(dimensions);
-} // Vertices array generated on initialisation.
+} 
 
 
 // Simple Getters and Setters.
@@ -227,11 +232,18 @@ void World::update() {} // Potential update function for later use.
 void World::Draw() const 
 {
     // Calls the draw function of every line in the Vertices array.
-    for (const Line &line : lines) 
+    for (const Line& line : lines) 
     {
         line.Draw();
     }
 };
+
+// Draw function for displaying the grid used by marching squares.
+void World::DrawGrid() const 
+{
+    for (const Line& line : grid) { line.Draw(); }
+};
+
 
 //-------------------------------------------------------------------------------------
 // Navmesh class.

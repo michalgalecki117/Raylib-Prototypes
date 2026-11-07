@@ -32,6 +32,7 @@ public:
     // Simple update and draw functions.
     void update();
     void Draw() const override;
+    void DrawGrid() const;
     
 private:
     // Inherited position and perlin noise of the world.
@@ -42,6 +43,9 @@ private:
     double threshold;
     // CellSize for the Marching Squares algorithm.
     int cellSize;
+
+    // Small vector of lines to store the grid, purely for visualisation of marching squares algorithm.
+    std::vector<Line> grid;
 
     // Private functions to simplify the Marching Squares edge finding algorithm.
     

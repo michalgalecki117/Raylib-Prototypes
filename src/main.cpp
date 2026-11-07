@@ -54,6 +54,7 @@ int main()
     bool showvertices = false;
     bool shownavmesh = false;
     bool showpoints = false;
+    bool showcells = false;
     
     // 2. Window Main loop
     // -------------------
@@ -90,6 +91,9 @@ int main()
 
         // Edge line end points visualisation control.
         if (IsKeyPressed(KEY_P))        { showpoints = !showpoints; }
+
+        // Grid of cellSize cells visualisation control.
+        if (IsKeyPressed(KEY_C))        { showcells = !showcells; }
 
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
@@ -144,14 +148,17 @@ int main()
             // Draw user spawned box obstacles.
             for (Box box : spawnedBoxes) { box.Draw(); }
 
-            // Draw vertices from world object, if turned on.
-            if (showvertices) { world.Draw(); }
+            // Draw world grid, if turned on.
+            if (showcells) { world.DrawGrid(); }
 
             // Draw navmesh from navmesh object, if turned on.
             if (shownavmesh) { navmesh.DrawNavmesh(); }
 
             // Draw edge line points, if turned on.
             if (showpoints) { navmesh.DrawPoints(); }
+
+            // Draw vertices from world object, if turned on.
+            if (showvertices) { world.Draw(); }
 
             // Draw text explaining current parameters of perlin noise.
             DrawText(
