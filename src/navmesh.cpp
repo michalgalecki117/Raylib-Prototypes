@@ -55,6 +55,9 @@ Vector2 World::Interp(Vector2 p1, Vector2 p2, double v1, double v2, Vector2 dime
 // To do so, it must first sort all the points along either the X or Y axis.
 void World::BuildBorderSegments(std::vector<Vector2>& pts, Vector2 cornerA, Vector2 cornerB, bool sortX) 
 {
+    // Middle point between segment ends for checking segment value.
+    Vector2 midPoint;
+
     // Manually add in both selected corners to the points pts vector.
     pts.push_back(cornerA);
     pts.push_back(cornerB);
@@ -74,7 +77,15 @@ void World::BuildBorderSegments(std::vector<Vector2>& pts, Vector2 cornerA, Vect
 
     // Create consecutive edge segments between every pair of points. 
     for (size_t i = 0; i < pts.size() - 1; i++) {
-        lines.push_back(Line(pts[i], pts[i + 1], PURPLE));
+        // Setup the middle point of each segment.
+        midPoint.x = (pts[i].x + pts[i+1].x) / 2;
+        midPoint.y = (pts[i].y + pts[i+1].y) / 2;
+        // Check if segment in our out of bounds.
+        if (SampleNoise(midPoint.x, midPoint.y) >= threshold) 
+        {
+            // Only add segment if the point is in bounds.
+            lines.push_back(Line(pts[i], pts[i + 1], PURPLE));
+        }
     }
 };
 
