@@ -1,6 +1,6 @@
 # Description
 Simple repository containing all my prototypes for the game I'm making in C++ using Raylib.
-Current prototype is purely for testing out vertices collision and navmesh creation.
+Current prototype is purely for testing out edge collision and navmesh creation.
 
 # Disclaimer
 The project is still in it's early prototyping phase, many bugs are to be expected.
