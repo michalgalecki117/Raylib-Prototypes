@@ -22,7 +22,7 @@ public:
     void SetDirectionRadians(float newRadians) { direction = newRadians; }
     
     // Update function regardless of input. (Affects position, speed and direction).
-    void update(const std::vector<Box>& boxes);
+    void update(const std::vector<Box>& boxes, const std::vector<Line>& vertices);
 
     // Update function based on input. (Affects position, speed and direction).
     void UpdateWithKeys(int target_direction);

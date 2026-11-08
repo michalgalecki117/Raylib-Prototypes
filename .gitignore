@@ -1,3 +1,9 @@
 /.vs
 /.vscode
 /main.code-workspace
+*.exe
+*.o
+*.obj
+bin/
+build/
+*.res
