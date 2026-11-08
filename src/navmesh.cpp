@@ -367,7 +367,7 @@ Navmesh::Navmesh(const std::vector<Line> lines)
     cdt.insertEdges(cdtEdges);
 
     CDT::TriIndUSet toErase = cdt.collectOuterTrianglesAndHoles();
-    CDT::Unrefined unrefined = cdt.refineTriangles(
+    cdt.refineTriangles(
         CDT::VertInd(10000),
         CDT::RefinementCriterion::SmallestAngle,
         CDT::degToRad(20.),

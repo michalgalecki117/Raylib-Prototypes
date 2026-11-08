@@ -13,21 +13,22 @@ The application builds as a proper windows executable, so It will most likely ge
 # Usage
 In-app controls :
 - App :
-    - Escape or window close button to close.
+    - Escape or window close button to close the app.
 - Movement :
-    - WSAD to move player (red circle object).
+    - WSAD to move player (gold circle object).
 - World control : 
     - Up/Down to change perlin noise seed.
     - Left/Right to change perlin noise scale.
     - Scrollwheel to change perlin noise persistence.
-    - G/T to change threshold for edge-detection and visualisation of perlin noise.
+    - [ / ] to change threshold for edge-detection (and background drawing).
 - Visualisation help :
-    - C to toggle grid display.
-    - V to toggle detected edges and boundries display.
-    - P to toggle detected edge end points display.
-    - N to toggle created navmesh display.
-    - B to toggle background display. (on by default)
-    - I to toggle background perlin noise information display. (on by default) 
+    - G to toggle grid.
+    - E to toggle detected edges and boundries.
+    - P to toggle detected edge end points.
+    - N to toggle created navmesh.
+    - C to toggle cursor location.
+    - B to toggle background. (on by default)
+    - I to toggle perlin noise information. (on by default) 
 
 # Notices
 This project uses the following open-source libraries :

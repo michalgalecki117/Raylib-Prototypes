@@ -21,19 +21,19 @@ int main()
     Vector2 screenDimensions = { (float)screenWidth, (float)screenHeight };
     
     // Player object initialisation.
-    Player player = Player({100,100}, 5, GOLD, 5, 90);
+    Player player = Player({75,75}, 5, GOLD, 0, 90);
     
     // Creation of Box array to contain user created obstacles.
     std::vector<Box> spawnedBoxes;
 
     // Window initialisation.
-    InitWindow(screenWidth, screenHeight, "Vertices based map and box colisions test.");
+    InitWindow(screenWidth, screenHeight, "Prototype");
     // TargetFPS to detatch fps from machine performance.
     SetTargetFPS(60);
     
     // Create world with threshold = 0.53 and cellSize = 15.
     // Based on a perlin noise of seed 1337, scale 0.01 and persistence 0.1.
-    World world(screenDimensions, 1338, 0.02, 0.1, 0.44, 10);
+    World world(screenDimensions, 1338, 0.02, 0.1, 0.44, 15);
     // Setting Cave color theme by default
     world.SetTheme(ColorTheme(7));
     // Creating the background texture from the world perlin noise.
@@ -48,11 +48,13 @@ int main()
     // Logic and input parameters for event handling.
     bool needsRefresh = false;
     float wheelMove;
+    Vector2 mousePos;
 
-    bool showvertices = false;
+    bool showedges = false;
     bool shownavmesh = false;
     bool showpoints = false;
-    bool showcells = false;
+    bool showgrid = false;
+    bool showcursor = false;
     // Only things displayed by default.
     bool showbackground = true;
     bool showinfo = true;
@@ -81,11 +83,11 @@ int main()
         if (IsKeyPressed(KEY_UP))       { world.SetSeed(world.GetSeed() + 1); needsRefresh = true; }
         
         // World perlin threshold control. (Also world vertices).
-        if (IsKeyPressed(KEY_T))        { world.SetThreshold(world.GetThreshold() + 0.01); needsRefresh = true; }
-        if (IsKeyPressed(KEY_G))        { world.SetThreshold(world.GetThreshold() - 0.01); needsRefresh = true; }
+        if (IsKeyPressed(KEY_LEFT_BRACKET))        { world.SetThreshold(world.GetThreshold() - 0.01); needsRefresh = true; }
+        if (IsKeyPressed(KEY_RIGHT_BRACKET))        { world.SetThreshold(world.GetThreshold() + 0.01); needsRefresh = true; }
         
-        // World vertices array visualisation control.
-        if (IsKeyPressed(KEY_V))        { showvertices = !showvertices; }
+        // World edges array visualisation control.
+        if (IsKeyPressed(KEY_E))        { showedges = !showedges; }
 
         // Navmesh visualisation control.
         if (IsKeyPressed(KEY_N))        { shownavmesh = !shownavmesh; }
@@ -94,7 +96,7 @@ int main()
         if (IsKeyPressed(KEY_P))        { showpoints = !showpoints; }
 
         // Grid of cellSize cells visualisation control.
-        if (IsKeyPressed(KEY_C))        { showcells = !showcells; }
+        if (IsKeyPressed(KEY_G))        { showgrid = !showgrid; }
 
         // Grid of cellSize cells visualisation control.
         if (IsKeyPressed(KEY_B))        { showbackground = !showbackground; }
@@ -102,9 +104,14 @@ int main()
         // Control display of information text (about the perlin noise).
         if (IsKeyPressed(KEY_I))        { showinfo = !showinfo; }
 
+        // Control display of cursor location.
+        if (IsKeyPressed(KEY_C))        { showcursor = !showcursor; }
+
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
-        
+
+        // Mouse position for cursor coordinate display.
+        mousePos = GetMousePosition();
 
         // 2.2 Updates and logic.
         // ---------------------
@@ -156,13 +163,13 @@ int main()
             }
 
             // Draw world grid, if turned on.
-            if (showcells) { world.DrawGrid(); }
+            if (showgrid) { world.DrawGrid(); }
 
             // Draw navmesh from navmesh object, if turned on.
             if (shownavmesh) { navmesh.DrawNavmesh(); }
 
             // Draw vertices from world object, if turned on.
-            if (showvertices) { world.Draw(); }
+            if (showedges) { world.Draw(); }
 
             // Draw edge line points, if turned on.
             if (showpoints) { navmesh.DrawPoints(); }
@@ -170,14 +177,31 @@ int main()
             // Draw user spawned box obstacles.
             for (Box box : spawnedBoxes) { box.Draw(); }
 
+            // Draw cursor location, if turned on.
+            if (showcursor) 
+            {
+                DrawText(
+                    TextFormat("%.f, %.f", mousePos.x, mousePos.y), mousePos.x + 7, mousePos.y - 13, 16, WHITE
+                );
+            }
+
             // Draw text explaining current parameters of perlin noise, if turned on.
             if (showinfo) 
             {
                 DrawText(
                     TextFormat("Seed: %u | Scale: %.4f | Threshold: %.2f | Persistence: %.4f", 
                         world.GetSeed(), world.GetScale(), world.GetThreshold(), world.GetPersistence()),
-                    20, 20, 16, RED
+                    20, 20, 20, WHITE
                 );
+
+                DrawText(
+                    TextFormat("Grid (G) : %s\nEdges (E) : %s\nPoints (P) : %s\nNavmmesh (N) : %s\nCursor (C) : %s\nBackground (B) : %s",
+                        (showgrid) ? "on" : "off", (showedges) ? "on" : "off",
+                        (showpoints) ? "on" : "off", (shownavmesh) ? "on" : "off",
+                        (showcursor) ? "on" : "off", (showbackground) ? "on" : "off"),
+                     20, 450, 20, WHITE
+                );
+
             }
 
             // Draw the player on top of everything else.
