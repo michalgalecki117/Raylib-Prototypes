@@ -210,11 +210,12 @@ int main()
                 );
 
                 DrawText(
-                    TextFormat("Grid (G) : %s\nEdges (E) : %s\nPoints (P) : %s\nNavmmesh (N) : %s\nCursor (C) : %s\nBackground (B) : %s",
+                    TextFormat("Grid (G) : %s\nEdges (E) : %s\nPoints (P) : %s\nNavmmesh (N) : %s\nCursor (C) : %s\nLine Path (L) : %s\nBackground (B) : %s",
                         (showgrid) ? "on" : "off", (showedges) ? "on" : "off",
                         (showpoints) ? "on" : "off", (shownavmesh) ? "on" : "off",
-                        (showcursor) ? "on" : "off", (showbackground) ? "on" : "off"),
-                     20, 450, 20, WHITE
+                        (showcursor) ? "on" : "off", (showline) ? "on" : "off",
+                        (showbackground) ? "on" : "off"),
+                     20, 430, 20, WHITE
                 );
 
             }
