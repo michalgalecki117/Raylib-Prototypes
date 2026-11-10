@@ -4,10 +4,6 @@
 #include "geometry.h"
 
 class Player : public Circle // Player gameobject. 
-/*
-Currently the only object class capable of movement 
-and limited interaction with different objects.
-*/
 {
 public:
     // Constructor with variables.

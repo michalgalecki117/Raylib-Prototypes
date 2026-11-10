@@ -12,7 +12,7 @@ CXXFLAGS = -Iinclude -Wall -std=c++17 -O1 -I$(RAYLIB_PATH)/src -Isrc
 
 # Linker flags and libraries.
 LDFLAGS = -L$(RAYLIB_PATH)/src
-LDLIBS = -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows
+LDLIBS = -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows -mconsole
 
 # Simply compile all .cpp files in src (source).
 SRCS = $(wildcard src/*.cpp)

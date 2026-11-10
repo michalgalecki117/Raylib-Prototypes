@@ -1,6 +1,6 @@
 # Description
 Simple repository containing all my prototypes for the game I'm making in C++ using Raylib.
-Current prototype is purely for testing out edge collision and navmesh creation.
+Current prototype version focuses on pathfinding solutions using a navmesh.
 
 ![Icon](assets/app.png)
 
@@ -27,8 +27,9 @@ In-app controls :
     - P to toggle detected edge end points.
     - N to toggle created navmesh.
     - C to toggle cursor location.
+    - L to toggle the line path of the pathfinding agent.
     - B to toggle background. (on by default)
-    - I to toggle perlin noise information. (on by default) 
+    - I to toggle perlin noise information. (on by default)
 
 # Notices
 This project uses the following open-source libraries :

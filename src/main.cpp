@@ -4,6 +4,7 @@
 #include "player.h"
 #include "geometry.h"
 #include "navmesh.h"
+#include "pathfinder.h"
 
 #include "perlin.h"
 #include "PerlinNoise.hpp"
@@ -22,6 +23,7 @@ int main()
     
     // Player object initialisation.
     Player player = Player({75,75}, 5, GOLD, 0, 90);
+    PathFinder agent = PathFinder({200,200}, 5, RED, 0);
     
     // Creation of Box array to contain user created obstacles.
     std::vector<Box> spawnedBoxes;
@@ -55,6 +57,7 @@ int main()
     bool showpoints = false;
     bool showgrid = false;
     bool showcursor = false;
+    bool showline = false;
     // Only things displayed by default.
     bool showbackground = true;
     bool showinfo = true;
@@ -107,14 +110,11 @@ int main()
         // Control display of cursor location.
         if (IsKeyPressed(KEY_C))        { showcursor = !showcursor; }
 
+        // Control display of cursor location.
+        if (IsKeyPressed(KEY_L))        { showline = !showline; }
+
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
-
-        // Mouse position for cursor coordinate display.
-        mousePos = GetMousePosition();
-
-        // 2.2 Updates and logic.
-        // ---------------------
 
         // Persistence update based on mousewheel movement.
         if (wheelMove != 0.0f) 
@@ -123,6 +123,17 @@ int main()
             world.SetPersistence(world.GetPersistence() + (wheelMove * 0.05));
             needsRefresh = true;
         }
+
+        // Mouse position for cursor coordinate display.
+        mousePos = GetMousePosition();
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            agent.GeneratePath(mousePos, navmesh.GetTriangles(), navmesh.GetPoints());
+        }
+
+        // 2.2 Updates and logic.
+        // ---------------------
 
         // Refresh world object in case of parameter change.
         if (needsRefresh) 
@@ -137,9 +148,10 @@ int main()
             needsRefresh = false;
         }
 
-        // Player object is the only object requiring continues unconditional updates. 
+        // Player object requires continues unconditional updates. 
         player.update(spawnedBoxes, borders);
-
+        // Same for any pathfinding agent.
+        agent.Update(navmesh.GetTriangles(), navmesh.GetPoints());
 
         // 2.3 Drawing
         // -----------
@@ -185,6 +197,9 @@ int main()
                 );
             }
 
+            // Draw the path of the pathfinding agent, if turned on.
+            if (showline) { agent.DrawPath(); }
+
             // Draw text explaining current parameters of perlin noise, if turned on.
             if (showinfo) 
             {
@@ -206,6 +221,9 @@ int main()
 
             // Draw the player on top of everything else.
             player.Draw();
+
+            // Draw the pathfinder agent aswell.
+            agent.Draw();
         
             EndDrawing();
     }

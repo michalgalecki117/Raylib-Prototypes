@@ -63,6 +63,10 @@ public :
     // Constructor with variables. No default constructor needed.
     Navmesh(const std::vector<Line> lines);
 
+    // Simple Getters and Setters.
+    std::vector<CDT::Triangle> GetTriangles() const { return triangles; };
+    std::vector<CDT::V2d<double>> GetPoints() const { return points; };
+
     // Simple Drawing function.
     void DrawPoints() const;
     void DrawNavmesh() const;
