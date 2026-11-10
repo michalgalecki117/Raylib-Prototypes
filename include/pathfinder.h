@@ -31,4 +31,4 @@ private:
 
     std::vector<Vector2> GetTrianglePoints(const CDT::Triangle& triangle, const std::vector<CDT::V2d<double>> meshPoints);
     Vector2 GetTriangleMiddlePoint(const std::vector<Vector2>& triangle);
-}
+};
