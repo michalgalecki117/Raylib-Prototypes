@@ -2,7 +2,7 @@
 Simple repository containing all my prototypes for the game I'm making in C++ using Raylib.
 Current prototype is purely for testing out edge collision and navmesh creation.
 
-![Icon](assets/app.png)
+![Icon](docs/app.png)
 
 # Disclaimer
 The project is still in it's early prototyping phase, many bugs are to be expected.
@@ -33,15 +33,15 @@ In-app controls :
 # Notices
 This project uses the following open-source libraries :
 - [Raylib](https://github.com/raysan5/raylib)
-    - Licence : zlib Licence, found [here](LICENCES/zlib%20Raylib%20LICENCE.txt).
+    - Licence : zlib Licence, found [here](docs/LICENCES/zlib%20Raylib%20LICENCE.txt).
     - Copyright : (c) 2013-2026 Ramon Santamaria (@raysan5)
     - Details : Used as the window manager and renderer for the project. 
 - [siv::PerlinNoise](https://github.com/Reputeless/PerlinNoise)
-    - Licence : MIT Licence, found [here](LICENCES/MIT%20PerlinNoise%20LICENCE.txt).
+    - Licence : MIT Licence, found [here](docs/LICENCES/MIT%20PerlinNoise%20LICENCE.txt).
     - Copyright : (C) 2013-2021 Ryo Suzuki <reputeless@gmail.com>
     - Details : Used for generating procedural world maps.
 - [CDT (Constrained Delaunay Triangulation)](https://github.com/artem-ogre/CDT)
-    - Licence : Mozilla Public License Version 2.0, found [here](LICENCES/MPL%202.0%20CDT%20LICENCE.txt).
+    - Licence : Mozilla Public License Version 2.0, found [here](docs/LICENCES/MPL%202.0%20CDT%20LICENCE.txt).
     - Details : Used for navmesh generation.
 
 # Installation / Implementation
@@ -50,3 +50,6 @@ If you still want to build the application yourself, there is two possible pathw
 - Install [Raylib](https://github.com/raysan5/raylib) directly on your C drive, make sure to use Windows.
 - Modify the Makefile directly to work with your own environment.
 For more information, see [Disclaimer](#disclaimer)
+
+# Diagrams
+For a more thorough overwiev of the project, check out it's class diagrams [here](docs/classDiagram.md)
