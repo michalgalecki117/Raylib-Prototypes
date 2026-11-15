@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <vector>
+#include <memory>
 
 #include "player.h"
 #include "geometry.h"
@@ -7,6 +8,10 @@
 
 #include "perlin.h"
 #include "PerlinNoise.hpp"
+
+#include "rendering.h"
+#include "transform.h"
+
 
 // Main function called at launch.
 int main() 
@@ -38,6 +43,35 @@ int main()
     world.SetTheme(ColorTheme(7));
     // Creating the background texture from the world perlin noise.
     Texture2D backgroundTexture = world.GenerateTexture(screenWidth, screenHeight, world.GetThreshold());
+
+
+    // TESTING TEMPORARY
+    ObjectTransform backgroundTransform = ObjectTransform((Vector2){400.0f,300.0f}, 0, 1);
+    std::unique_ptr<Drawable> backgroundRenderer = Drawable::makeDrawer(backgroundTexture);
+    ObjectTransform testingTransform = ObjectTransform((Vector2){400.0f,300.0f}, 0, 2);
+    std::unique_ptr<Shape> shape = Shape::makePolygon((std::vector<Vector2>)
+    {
+        {  0.0f, -80.0f }, // 0: Blade tip
+        {  6.0f, -60.0f }, // 1: Upper blade right
+        {  6.0f, -10.0f }, // 2: Lower blade right
+        { 28.0f, -10.0f }, // 3: Crossguard right tip
+        { 28.0f, -4.0f  }, // 4: Crossguard right base
+        {  4.0f, -4.0f  }, // 5: Hilt right top
+        {  4.0f,  25.0f }, // 6: Hilt right bottom
+        {  9.0f,  32.0f }, // 7: Pommel right
+        {  0.0f,  38.0f }, // 8: Pommel bottom tip
+        { -9.0f,  32.0f }, // 9: Pommel left
+        { -4.0f,  25.0f }, // 10: Hilt left bottom
+        { -4.0f, -4.0f  }, // 11: Hilt left top
+        {-28.0f, -4.0f  }, // 12: Crossguard left base
+        {-28.0f, -10.0f }, // 13: Crossguard left tip
+        { -6.0f, -10.0f }, // 14: Lower blade left
+        { -6.0f, -60.0f }  // 15: Upper blade left
+    },
+    { 0.0f, 0.0f }         // Origin at the hilt center
+    );
+    std::unique_ptr<Drawable> shapeRenderer = Drawable::makeDrawer(GREEN, *shape);
+
 
     // Line vector to store world vertices for collision detection.
     std::vector<Line> borders = world.GetVertices();
@@ -107,6 +141,19 @@ int main()
         // Control display of cursor location.
         if (IsKeyPressed(KEY_C))        { showcursor = !showcursor; }
 
+        // TEMPORARY TESTING
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
+        {
+            float rotation = testingTransform.getRotation();
+            testingTransform.setRotation(rotation + 1.0f);
+        }
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) 
+        {
+            float rotation = testingTransform.getRotation();
+            testingTransform.setRotation(rotation - 1.0f);
+        }
+
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
 
@@ -131,6 +178,8 @@ int main()
             UnloadTexture(backgroundTexture);
             backgroundTexture = world.Refresh(screenDimensions); // Clean 1-argument call!
 
+            backgroundRenderer = Drawable::makeDrawer(backgroundTexture);
+
             borders = world.GetVertices();
             navmesh = Navmesh(borders);
 
@@ -152,14 +201,7 @@ int main()
             if (showbackground) 
             {
                 // Draw background perlin noise based texture, if turned on.
-                DrawTexturePro(
-                    backgroundTexture,
-                    (Rectangle){ 0, 0, screenDimensions.x, screenDimensions.y },          
-                    (Rectangle){ 0, 0, screenDimensions.x, screenDimensions.y },    
-                    (Vector2){ 0, 0 },                                              
-                    0.0f,                                                           
-                    WHITE                                                           
-                );
+                backgroundRenderer->draw(backgroundTransform);
             }
 
             // Draw world grid, if turned on.
@@ -206,6 +248,7 @@ int main()
 
             // Draw the player on top of everything else.
             player.Draw();
+            shapeRenderer->draw(testingTransform);
         
             EndDrawing();
     }
