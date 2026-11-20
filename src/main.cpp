@@ -11,6 +11,7 @@
 #include "rendering.h"
 #include "transform.h"
 #include "obstacle.h"
+#include "textureGenerator.h"
 
 // Main function called at launch.
 int main() 
@@ -43,10 +44,18 @@ int main()
     // Creating the background texture from the world perlin noise.
     Texture2D backgroundTexture = world.GenerateTexture(screenWidth, screenHeight, world.GetThreshold());
 
-
     // TESTING TEMPORARY
     ObjectTransform backgroundTransform = ObjectTransform((Vector2){400.0f,300.0f}, 0, 1);
-    std::unique_ptr<Drawable> backgroundRenderer = Drawable::makeDrawer(backgroundTexture);
+    
+    Perlin perlin(1338, 0.02, 0.01);
+    TextureGenerator generator = TextureGenerator::makeGenerator(
+        {0.43f, 0.44f, 0.45f},
+        {{ 30, 30, 40, 255 }, { 80, 80, 100, 255 }, { 15, 15, 20, 255 }},
+        screenDimensions
+    );
+    Texture2D newBackgroundTexture = generator.generateTexture(perlin);
+
+    std::unique_ptr<Drawable> backgroundRenderer = Drawable::makeDrawer(newBackgroundTexture);
     ObjectTransform testingTransform = ObjectTransform((Vector2){400.0f,300.0f}, 0, 2);
     std::unique_ptr<Shape> shape = Shape::makePolygon((std::vector<Vector2>)
     {
@@ -173,7 +182,7 @@ int main()
         {
             // Delete old texture and create new one, also refrech world vertices array.
             UnloadTexture(backgroundTexture);
-            backgroundTexture = world.Refresh(screenDimensions); // Clean 1-argument call!
+            backgroundTexture = world.Refresh(screenDimensions);
 
             backgroundRenderer = Drawable::makeDrawer(backgroundTexture);
 
@@ -220,7 +229,7 @@ int main()
             if (showcursor) 
             {
                 DrawText(
-                    TextFormat("%.f, %.f", mousePos.x, mousePos.y), mousePos.x + 7, mousePos.y - 13, 16, WHITE
+                    TextFormat("%.f, %.f, %.2f", mousePos.x, mousePos.y, world.SampleNoise(mousePos.x, mousePos.y)), mousePos.x + 7, mousePos.y - 13, 16, WHITE
                 );
             }
 

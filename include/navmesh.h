@@ -15,7 +15,6 @@ public:
         double persistence = 0.25, double threshold = 0.5, int cellSize = 15
     ); // Variables set by default to allow for default constructor usage.
 
-
     // Simple Getters and Setters.
     double GetThreshold() const;
     void SetThreshold(double newThreshold); 

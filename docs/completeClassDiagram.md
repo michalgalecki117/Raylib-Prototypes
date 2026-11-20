@@ -38,7 +38,7 @@ classDiagram
 
     class Transform {
         -Vector2 position
-        -float direction
+        -float rotation
         -float scale
     }
 
@@ -64,9 +64,12 @@ classDiagram
 
     class Obstacle {
         -unique_ptr~Drawable~ renderer
-        -Texture2D texture
         -unique_ptr~Shape~ collisionShape
         -Transform transform
+        +rotateTo(float angle)
+        +rotateBy(float angle, bool clockwise)
+        +moveTo(Vector2 position)
+        +moveBy(float distance)
     }
 
     Obstacle *-- Drawable : owns
@@ -117,14 +120,14 @@ classDiagram
 
     class ShapeDrawer {
         -Color color
-        -Shape& shape 
+        -const Shape& shape 
         +draw(const Transform& transform)
     }
 
     ShapeDrawer --> Shape : references
 
     class TextureDrawer {
-        -Texture2d texture
+        -const Texture2d texture
         +draw(const Transform& transform)
     }
 
@@ -133,6 +136,7 @@ classDiagram
 
         class Shape {
         <<Interface>>
+        static makeShape(shape specific parameters) unique_ptr<Shape>
     }
 
     class Circle {
@@ -140,6 +144,7 @@ classDiagram
     }
 
     class Rectangle {
+        -Vector2 middle
         -Vector2 size
     }
 
@@ -167,13 +172,13 @@ classDiagram
     Shape <|.. Triangle : implements
     Shape <|.. Line : implements
 
-    class Background {
-        -unique_ptr~Drawable~ renderer
-        -Texture2D texture
-        -vector~float~ thresholds
-        -vector~Color~ colors
-        +GenerateTexture(int, int, double)
+    class TextureGenerator {
+        -map<float, Color> pattern
+        -const int width
+        -const int height
+        -getColorForNoise(souble noise) const Color
+        +static makeGenerator(pattern, dimensions) TextureGenerator
+        +GenerateTexture() Texture2D
     }
 
-    Background *-- Drawable : owns
-    Background --> Perlin : depends on
+    TextureGenerator --> Perlin : depends on
