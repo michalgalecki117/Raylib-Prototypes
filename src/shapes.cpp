@@ -1,7 +1,6 @@
 #include <memory>
 #include "shapes.h"
 
-
 std::unique_ptr<Shape> Shape::makeCircle(float radius) 
 {
     return std::unique_ptr<Shape>(new TCircle(radius));
@@ -24,5 +23,38 @@ std::unique_ptr<Shape> Shape::makeLine(Vector2 pos1, Vector2 pos2)
 
 std::unique_ptr<Shape> Shape::makePolygon(std::vector<Vector2> vertices, Vector2 origin) 
 {
-    return std::unique_ptr<Shape>(new TPolygon(vertices, origin));
+    // Create mesh struct to hold the polygon mesh.
+    u::Mesh mesh;
+
+    // Vector to hold points of cdt format.
+    std::vector<CDT::V2d<double>> cdtPoints;
+
+    // Vector to hold edges of cdt format.
+    std::vector<CDT::Edge> edges;
+
+    // Convert all Vector2 vertices into CDT vectors
+    for (const Vector2& point : vertices) 
+    {   
+        cdtPoints.push_back({
+        static_cast<double>(point.x)
+        ,static_cast<double>(point.y)
+        });
+    }
+
+    // Construct shape contours by connecting each point to the next as edges.
+    size_t size = cdtPoints.size();
+    for (size_t i = 0; i < size; i++) { edges.push_back({i, (i + 1) % size}); }
+
+    // Initialising CDT triangulation.
+    CDT::Triangulation<double> cdt;
+    cdt.insertVertices(cdtPoints);
+    cdt.insertEdges(edges);
+    cdt.eraseOuterTrianglesAndHoles();
+
+    // Fill mesh with unconstrained delaunay triangulation.
+    // I.E triangles to connect all edges.
+    mesh.points = cdt.vertices;
+    mesh.triangles = cdt.triangles;
+    
+    return std::unique_ptr<Shape>(new TPolygon(mesh, origin));
 }

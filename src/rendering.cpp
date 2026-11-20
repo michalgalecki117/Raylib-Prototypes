@@ -2,6 +2,9 @@
 #include <memory>
 #include <vector>
 #include <cmath>
+#include "mesh.h"
+
+namespace u = utils;
 
 // Factory function of Drawable interface. 
 // It makes the ShapeDrawer when provided a color and shape.
@@ -122,21 +125,30 @@ void ShapeDrawer::draw(const ObjectTransform& transform)
 
     if (const auto* polygon = dynamic_cast<const TPolygon*>(&shape)) 
     {
-        std::vector<Vector2> pos = polygon->getVertices();
+        u::Mesh mesh = polygon->getMesh();
         middle = polygon->getOrigin();
-        int sides = polygon->getSides();
 
-        std::vector<Vector2> realPositions;
-        realPositions.reserve(sides + 1);
-        realPositions.push_back(translateVertex(middle));
-        
-        for (int i = 0; i < sides; i++) 
+        // Gets every CDT triangle in mesh.
+        for (const CDT::Triangle& t : mesh.triangles) 
         {
-            realPositions.push_back(translateVertex(pos[i]));
+            // Get all 3 indexes of the triangle points.
+            size_t i0 = t.vertices[0];
+            size_t i1 = t.vertices[1];
+            size_t i2 = t.vertices[2];
+    
+            // Get the actual V2d point from points based on index.
+            const CDT::V2d<double> pt0 = mesh.points[i0];
+            const CDT::V2d<double> pt1 = mesh.points[i1];
+            const CDT::V2d<double> pt2 = mesh.points[i2];
+
+            // Convert V2d point to Vector2 point to allow drawing.
+            Vector2 v0 = translateVertex({ static_cast<float>(pt0.x), static_cast<float>(pt0.y) });
+            Vector2 v1 = translateVertex({ static_cast<float>(pt1.x), static_cast<float>(pt1.y) });
+            Vector2 v2 = translateVertex({ static_cast<float>(pt2.x), static_cast<float>(pt2.y) });
+
+            // Draw actual triangle overlay.
+            DrawTriangle(v0, v1, v2, color);
         }
-
-        DrawTriangleFan(realPositions.data(), sides, color);
-
     }
     
 
