@@ -1,6 +1,6 @@
 #pragma once
 
-#include <raylib.h>
+#include "raylib.h"
 #include "PerlinNoise.hpp"
 
 enum class ColorTheme // Simple enum class to simplify switching themes.

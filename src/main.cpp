@@ -1,4 +1,4 @@
-#include <raylib.h>
+#include "raylib.h"
 #include <vector>
 #include <memory>
 
@@ -7,11 +7,10 @@
 #include "navmesh.h"
 
 #include "perlin.h"
-#include "PerlinNoise.hpp"
 
 #include "rendering.h"
 #include "transform.h"
-
+#include "obstacle.h"
 
 // Main function called at launch.
 int main() 
@@ -70,8 +69,8 @@ int main()
     },
     { 0.0f, 0.0f }         // Origin at the hilt center
     );
-    std::unique_ptr<Drawable> shapeRenderer = Drawable::makeDrawer(GREEN, *shape);
 
+    Obstacle obstacle = Obstacle::makeObstacle(std::move(shape), testingTransform, LIGHTGRAY);
 
     // Line vector to store world vertices for collision detection.
     std::vector<Line> borders = world.GetVertices();
@@ -144,14 +143,12 @@ int main()
         // TEMPORARY TESTING
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
         {
-            float rotation = testingTransform.getRotation();
-            testingTransform.setRotation(rotation + 1.0f);
+            obstacle.rotateBy(1);
         }
 
         if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) 
         {
-            float rotation = testingTransform.getRotation();
-            testingTransform.setRotation(rotation - 1.0f);
+            obstacle.rotateBy(-1);
         }
 
         // Mouse wheel movement for world perlin persistence control.
@@ -248,7 +245,7 @@ int main()
 
             // Draw the player on top of everything else.
             player.Draw();
-            shapeRenderer->draw(testingTransform);
+            obstacle.draw();
         
             EndDrawing();
     }

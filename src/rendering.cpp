@@ -4,8 +4,6 @@
 #include <cmath>
 #include "mesh.h"
 
-namespace u = utils;
-
 // Factory function of Drawable interface. 
 // It makes the ShapeDrawer when provided a color and shape.
 std::unique_ptr<Drawable> Drawable::makeDrawer(const Color& color, const Shape& shape) 
@@ -24,9 +22,9 @@ std::unique_ptr<Drawable> Drawable::makeDrawer(const Texture2D& texture)
 // Draws its loaded texture at the position, rotation and scale indicated by transform.
 void TextureDrawer::draw(const ObjectTransform& transform) 
 {
-    Vector2 position = transform.getPosition();
-    float rotation = transform.getRotation();
-    float scale = transform.getScale();
+    const Vector2& position = transform.getPosition();
+    const float& rotation = transform.getRotation();
+    const float& scale = transform.getScale();
 
     float width = static_cast<float>(texture.width) * scale;
     float height = static_cast<float>(texture.height) * scale;
@@ -46,9 +44,9 @@ void TextureDrawer::draw(const ObjectTransform& transform)
 // Draws its shape in its given color at the position, rotation and scale indicated by transform.
 void ShapeDrawer::draw(const ObjectTransform& transform) 
 {
-    Vector2 position = transform.getPosition();
-    float rotation = transform.getRotation();
-    float scale = transform.getScale();
+    const Vector2& position = transform.getPosition();
+    const float& rotation = transform.getRotation();
+    const float& scale = transform.getScale();
 
     float radians = rotation * DEG2RAD;
     float cosA = cos(radians);
@@ -125,7 +123,7 @@ void ShapeDrawer::draw(const ObjectTransform& transform)
 
     if (const auto* polygon = dynamic_cast<const TPolygon*>(&shape)) 
     {
-        u::Mesh mesh = polygon->getMesh();
+        const mesh::Mesh& mesh = polygon->getMesh();
         middle = polygon->getOrigin();
 
         // Gets every CDT triangle in mesh.

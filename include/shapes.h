@@ -1,10 +1,8 @@
 #pragma once
-#include <raylib.h>
+#include "raylib.h"
 #include <memory>
 #include <vector>
 #include "mesh.h"
-
-namespace u = utils;
 
 class Shape // Shape Interface
 {
@@ -13,6 +11,7 @@ public:
 
     // Set default destructor just in case.
     virtual ~Shape() = default;
+    
 
     static std::unique_ptr<Shape> makeCircle(float radius);
     static std::unique_ptr<Shape> makeRectangle(Vector2 size);
@@ -39,13 +38,7 @@ private:
 public:
     // Simple Getters and Setters.
     float getRadius() const { return radius; }
-    void setRadius(float newRadius)
-    {
-        if (newRadius > 0)
-        {
-            radius = newRadius;
-        }
-    }
+    void setRadius(float newRadius) { if (newRadius > 0) { radius = newRadius; } }
 };
 
 // Implementation of Shape interface, Rectangle class.
@@ -53,25 +46,31 @@ class TRectangle : public Shape
 {
 private:
     // By itself, a rectangle shape only has it's size vector.
+    Vector2 middle;
     Vector2 size;
 
     // Keeping the constructor private.
     // Only the interface factory method can create a new Rectangle.
     TRectangle(Vector2 size)
-        : size(size) {}
+        : size(size)
+    {
+        middle = {size.x / 2.0f, size.y / 2.0f};
+    }
 
     // Permit access to constructor only to Shape factory.
     friend std::unique_ptr<Shape> Shape::makeRectangle(Vector2 size);
 
 public:
     // Simple Getters and Setters.
+    Vector2 getMiddle() const { return middle; }
     Vector2 getSize() const { return size; }
     void setSize(Vector2 newSize)
-    {
-        if (newSize.x > 0 && newSize.y > 0)
-        {
+    { 
+        if (newSize.x > 0 && newSize.y > 0) 
+        { 
             size = newSize;
-        }
+            middle = {size.x / 2.0f, size.y / 2.0f};
+        } 
     }
 };
 
@@ -150,20 +149,19 @@ private:
     // By itself, a polygon shape only has it's n vertices.
     // In addition, we save the position of the midpoint.
     Vector2 origin;
-    u::Mesh mesh;
+    mesh::Mesh mesh;
 
     // Keeping the constructor private.
     // Only the interface factory method can create a new Polygon.
-    TPolygon(u::Mesh mesh, Vector2 origin)
+    TPolygon(mesh::Mesh mesh, Vector2 origin)
         : origin(origin), mesh(mesh)
-    {
-    }
+    {}
 
     // Permit access to constructor only to Shape factory.
     friend std::unique_ptr<Shape> Shape::makePolygon(std::vector<Vector2> vertices, Vector2 origin);
 
 public:
     // Simple Getters and Setters.
-    u::Mesh getMesh() const { return mesh; }
+    mesh::Mesh getMesh() const { return mesh; }
     Vector2 getOrigin() const { return origin; }
 };

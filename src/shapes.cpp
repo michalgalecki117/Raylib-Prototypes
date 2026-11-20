@@ -24,7 +24,7 @@ std::unique_ptr<Shape> Shape::makeLine(Vector2 pos1, Vector2 pos2)
 std::unique_ptr<Shape> Shape::makePolygon(std::vector<Vector2> vertices, Vector2 origin) 
 {
     // Create mesh struct to hold the polygon mesh.
-    u::Mesh mesh;
+    mesh::Mesh mesh;
 
     // Vector to hold points of cdt format.
     std::vector<CDT::V2d<double>> cdtPoints;
@@ -43,7 +43,12 @@ std::unique_ptr<Shape> Shape::makePolygon(std::vector<Vector2> vertices, Vector2
 
     // Construct shape contours by connecting each point to the next as edges.
     size_t size = cdtPoints.size();
-    for (size_t i = 0; i < size; i++) { edges.push_back({i, (i + 1) % size}); }
+    for (size_t i = 0; i < size; i++) 
+    {
+        CDT::VertInd a = static_cast<CDT::VertInd>(i);
+        CDT::VertInd b = static_cast<CDT::VertInd>((i + 1) % size);
+        edges.push_back({a, b}); 
+    }
 
     // Initialising CDT triangulation.
     CDT::Triangulation<double> cdt;

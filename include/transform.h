@@ -1,6 +1,5 @@
 #pragma once
-#include <raylib.h>
-#include <cmath>
+#include "raylib.h"
 
 class ObjectTransform // Transform component of all game objects.
 {
@@ -10,21 +9,20 @@ private:
     Vector2 position;
     float rotation;
     float scale;
+
 public:
     // Simple constructor with variables for the transform class.
-    ObjectTransform(Vector2 position, float rotation = 0.0f , float scale = 1.0f)
-        : position(position), rotation(rotation), scale(scale) {}
-
+    ObjectTransform(Vector2 position, float rotation = 0.0f, float scale = 1.0f);
     // Simple Getters and Setters.
     Vector2 getPosition() const { return position; }
     void setPosition(Vector2 newPosition) { position = newPosition; }
 
     float getRotation() const { return rotation; }
     void setRotation(float newRotation) { rotation = newRotation; }
+    // Radian versions.
+    float getRotationRad() const;
+    void setRotationRad(float newRotationRad);
 
     float getScale() const { return scale; }
-    void setScale(float newScale) 
-    {  
-        if (newScale > 0.0f && newScale < 20.0f) { scale = newScale; }
-    }
+    void setScale(float newScale);
 };

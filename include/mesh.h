@@ -2,7 +2,7 @@
 #include <vector>
 #include "CDT/CDT.h"
 
-namespace utils 
+namespace mesh 
 {
     struct Mesh
     {
@@ -11,4 +11,5 @@ namespace utils
         // And also the set of triangle corners.
         std::vector<CDT::V2d<double>> points;
     };
+
 };
