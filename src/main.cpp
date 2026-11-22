@@ -31,14 +31,16 @@ int main()
     SetTargetFPS(60);
     
     // Initialise world generation pipeline and storage.
-    WorldGen worldGen = WorldGen::makeNew(1338, 0.02, 0.01, 0.44);
+    WorldGen worldGen = WorldGen::makeNew(1338, 0.02, 0.01, 0.44, screenDimensions, 15);
 
     // Transform component of the background texture itself.
     ObjectTransform backgroundTransform = ObjectTransform((Vector2){500.0f,375.0f}, 0, 1);
     // Creating the background texture from the world perlin noise.
+    std::vector<float> thresholds = {0.43f, 0.44f, 0.45f};
+    std::vector<Color> colors = {{ 30, 30, 40, 255 }, { 80, 80, 100, 255 }, { 15, 15, 20, 255 }};
     TextureGenerator generator = TextureGenerator::makeGenerator(
-        {0.43f, 0.44f, 0.45f},
-        {{ 30, 30, 40, 255 }, { 80, 80, 100, 255 }, { 15, 15, 20, 255 }},
+        thresholds,
+        colors,
         screenDimensions
     );
     Texture2D newBackgroundTexture = generator.generateTexture(worldGen.getPerlin());
@@ -82,9 +84,15 @@ int main()
 
     // Logic and input parameters for event handling.
     bool needsRefresh = false;
+    // For redrawing the world with a different edge detection threshold.
+    // This is purely for visualisation.
+    float thresholdOffset = 0.0f;
+
+    // Positional arguments.
     float wheelMove;
     Vector2 mousePos;
 
+    // Logical arguments.
     bool showedges = false;
     bool shownavmesh = false;
     bool showpoints = false;
@@ -192,6 +200,7 @@ int main()
 
             // World generation pipeline reset.
             worldGen.reset(tmpSeed, tmpScale, tmpPer, tmpThresh - 0.01);
+            thresholdOffset -= 0.01;
             needsRefresh = true; 
         }
         if (IsKeyPressed(KEY_RIGHT_BRACKET))
@@ -208,6 +217,7 @@ int main()
 
             // World generation pipeline reset.
             worldGen.reset(tmpSeed, tmpScale, tmpPer, tmpThresh + 0.01);
+            thresholdOffset += 0.01;
             needsRefresh = true; 
         }
         
@@ -276,6 +286,12 @@ int main()
             // Delete old texture and create new one, also refrech world vertices array.
             UnloadTexture(newBackgroundTexture);
 
+            std::vector<float> shiftedThresholds = thresholds;
+            for (size_t i = 0; i < shiftedThresholds.size(); i++) 
+            {
+                shiftedThresholds[i] += thresholdOffset;
+            }
+            generator = TextureGenerator::makeGenerator(shiftedThresholds, colors, screenDimensions);
             newBackgroundTexture = generator.generateTexture(worldGen.getPerlin());
 
             // world.Refresh(screenDimensions);
@@ -308,16 +324,35 @@ int main()
             }
 
             // Draw world grid, if turned on.
-            // if (showgrid) { world.DrawGrid(); }
+            if (showgrid) 
+            { 
+                // Purely for visualisation, create grid from cellSize to demonstrate function of Marching Squares.
+                for (float x = 0; x < screenDimensions.x; x += 15) { DrawLineV({x, 0}, {x, screenDimensions.y}, {100,100,100,200}); }
+                for (float y = 0; y < screenDimensions.y; y += 15) { DrawLineV({0, y}, {screenDimensions.x, y}, {100,100,100,200}); } 
+                
+            }
 
             // Draw navmesh from navmesh object, if turned on.
             // if (shownavmesh) { navmesh.DrawNavmesh(); }
 
             // Draw vertices from world object, if turned on.
-            // if (showedges) { world.Draw(); }
+            if (showedges) 
+            {
+                std::vector<Vector2> points = worldGen.getWorld().getUniquePoints();
+                std::vector<std::pair<size_t, size_t>> edges = worldGen.getWorld().getEdges();
+
+                for (const std::pair<size_t, size_t> edge : edges) 
+                {
+                    DrawLineV(points[edge.first], points[edge.second], RED);
+                }
+            }
 
             // Draw edge line points, if turned on.
-            // if (showpoints) { navmesh.DrawPoints(); }
+            if (showpoints) 
+            { 
+                std::vector<Vector2> points = worldGen.getWorld().getUniquePoints();
+                for (const Vector2 point : points) { DrawCircleV(point, 2, BLUE); } 
+            }
 
             // Draw cursor location, if turned on.
             if (showcursor) 

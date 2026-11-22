@@ -12,8 +12,8 @@ private:
     // This will be required for generating a proper texture in reasonable time.
     std::map<float, Color> pattern;
     // Also store desired dimensions of the texture.
-    const int width;
-    const int height;
+    int width;
+    int height;
 
     // Private constructor with variables>
     TextureGenerator(std::map<float, Color> pattern, int width, int height)
@@ -30,5 +30,5 @@ public:
     static TextureGenerator makeGenerator(std::vector<float> thresholds, std::vector<Color> colors, int width, int height);
 
     // GenerateTexture with a perlin noise as a baseline.
-    Texture2D generateTexture(const Perlin& perlin); 
+    Texture2D generateTexture(const Perlin& perlin);
 };
