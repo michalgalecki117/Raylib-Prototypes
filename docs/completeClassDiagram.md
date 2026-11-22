@@ -3,7 +3,7 @@
 config:
   layout: elk
   elk:
-    mergeEdges: false
+    mergeWorld: false
     nodePlacementStrategy: NETWORK_SIMPLEX
 ---
 classDiagram
@@ -43,14 +43,14 @@ classDiagram
     }
 
     class MovementCore {
-        -Edges& edges
+        -World& edges
         -float speed
         -float direction
         +update(bool collides)
         +move()
     }
 
-    MovementCore --> Edges : references
+    MovementCore --> World : references
 
     class PathingCore {
         -float speed
@@ -66,6 +66,8 @@ classDiagram
         -unique_ptr~Drawable~ renderer
         -unique_ptr~Shape~ collisionShape
         -Transform transform
+        -bool collider
+        -bool overrideTerrain
         +rotateTo(float angle)
         +rotateBy(float angle, bool clockwise)
         +moveTo(Vector2 position)
@@ -78,23 +80,23 @@ classDiagram
 
     class WorldGen {
         -Perlin perlin
-        -Edges edges
+        -World edges
         -Navmesh navmesh
         +generate(uint32_t seed, double scale, double persistence)
     }
 
     WorldGen *-- Perlin : owns
-    WorldGen *-- Edges : owns
+    WorldGen *-- World : owns
     WorldGen *-- Navmesh : owns
 
     class Navmesh {
         -vector~CDT::Triangle~ triangles
         -vector~CDT::V2d~double~~ vertices
-        -Edges& edges
-        +generateMesh(const Edges& edges)
+        -World& edges
+        +generateMesh(const World& edges)
     }
 
-    Navmesh --> Edges : depends on
+    Navmesh --> World : depends on
 
     class Perlin {        
         -siv::PerlinNoise m_perlin
@@ -104,14 +106,15 @@ classDiagram
         +sampleNoise(int, int) double
     }
 
-    class Edges {
+    class World {
         -vector~Line~ edges
         -vector~Obstacle~ obstacles
         -Perlin& perlin
-        +generateEdges()
+        +generateWorld()
     }
 
-    Edges <-- Perlin : depend on
+    World <-- Perlin : depend on
+    World *-- Obstacle : owns
 
     class Drawable {
         <<Interface>>

@@ -71,7 +71,7 @@ Creates an Image, converts it to a texture and unloads it.
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             // Sample noise at given coordinates.
-            double noise = perlin.SampleNoise(x, y);
+            double noise = perlin.sampleNoise(x, y);
             // Apply color depending on pattern. Append to pixels.
             pixels[y * width + x] = getColorForNoise(noise);
         }

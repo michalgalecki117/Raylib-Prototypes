@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "raylib.h"
-#include "perlin.h"
+#include "worldgen.h"
 
 class TextureGenerator // Class to build and modify the environment' textures. 
 {

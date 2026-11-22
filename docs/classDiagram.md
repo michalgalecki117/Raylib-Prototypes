@@ -45,7 +45,7 @@ classDiagram
 
     Circle <|-- Player : inherits
 
-        class ColorTheme {
+    class ColorTheme {
         <<enumeration>>
         Space
         Forest

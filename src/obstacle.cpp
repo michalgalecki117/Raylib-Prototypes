@@ -5,10 +5,13 @@
 Obstacle::Obstacle(
     std::unique_ptr<Drawable> renderer, 
     std::unique_ptr<Shape> collisionShape, 
-    ObjectTransform transform) 
+    ObjectTransform transform,
+    bool collider, bool overrideTerrain) 
         : renderer(std::move(renderer)), 
         collisionShape(std::move(collisionShape)),
-        transform(transform)
+        transform(transform),
+        collider(collider),
+        overrideTerrain(overrideTerrain)
     {};
 
 // Factory.
@@ -27,6 +30,40 @@ Obstacle Obstacle::makeObstacle(const Texture2D& texture, std::unique_ptr<Shape>
     std::unique_ptr<Drawable> renderer =  Drawable::makeDrawer(texture);
     // Call the actual private constructor.
     return Obstacle(std::move(renderer), std::move(collisionShape), transform);
+}
+
+Obstacle Obstacle::makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, Color color)
+{
+    // Creating a renderer using the Drawable interface factory.
+    std::unique_ptr<Drawable> renderer =  Drawable::makeDrawer(color, *collisionShape);
+
+    // Call the actual private constructor.
+    return Obstacle(std::move(renderer),std::move(collisionShape), transform, collider);
+}
+// Factory with a Texture2D texture.
+Obstacle Obstacle::makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider)
+{
+    // Creating a renderer using the Drawable interface factory.
+    std::unique_ptr<Drawable> renderer =  Drawable::makeDrawer(texture);
+    // Call the actual private constructor.
+    return Obstacle(std::move(renderer), std::move(collisionShape), transform, collider);
+}
+
+Obstacle Obstacle::makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, bool overrideTerrain, Color color)
+{
+    // Creating a renderer using the Drawable interface factory.
+    std::unique_ptr<Drawable> renderer =  Drawable::makeDrawer(color, *collisionShape);
+
+    // Call the actual private constructor.
+    return Obstacle(std::move(renderer),std::move(collisionShape), transform, collider, overrideTerrain);
+}
+// Factory with a Texture2D texture.
+Obstacle Obstacle::makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, bool overrideTerrain)
+{
+    // Creating a renderer using the Drawable interface factory.
+    std::unique_ptr<Drawable> renderer =  Drawable::makeDrawer(texture);
+    // Call the actual private constructor.
+    return Obstacle(std::move(renderer), std::move(collisionShape), transform, collider, overrideTerrain);
 }
 
 // rotateTo a given angle directly.

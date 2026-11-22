@@ -3,11 +3,8 @@
 #include <memory>
 
 #include "player.h"
-#include "geometry.h"
-#include "navmesh.h"
 
-#include "perlin.h"
-
+#include "worldgen.h"
 #include "rendering.h"
 #include "transform.h"
 #include "obstacle.h"
@@ -20,43 +17,38 @@ int main()
     // -----------------
 
     // Window size set by default for simplicity.
-    constexpr int screenWidth = 800;
-    constexpr int screenHeight = 600;
+    constexpr int screenWidth = 1000;
+    constexpr int screenHeight = 750;
     // Vector2 used for passing to a few objects.
     Vector2 screenDimensions = { (float)screenWidth, (float)screenHeight };
     
     // Player object initialisation.
     Player player = Player({75,75}, 5, GOLD, 0, 90);
     
-    // Creation of Box array to contain user created obstacles.
-    std::vector<Box> spawnedBoxes;
-
     // Window initialisation.
     InitWindow(screenWidth, screenHeight, "Prototype");
     // TargetFPS to detatch fps from machine performance.
     SetTargetFPS(60);
     
-    // Create world with threshold = 0.53 and cellSize = 15.
-    // Based on a perlin noise of seed 1337, scale 0.01 and persistence 0.1.
-    World world(screenDimensions, 1338, 0.02, 0.1, 0.44, 15);
-    // Setting Cave color theme by default
-    world.SetTheme(ColorTheme(7));
-    // Creating the background texture from the world perlin noise.
-    Texture2D backgroundTexture = world.GenerateTexture(screenWidth, screenHeight, world.GetThreshold());
+    // Initialise world generation pipeline and storage.
+    WorldGen worldGen = WorldGen::makeNew(1338, 0.02, 0.01, 0.44);
 
-    // TESTING TEMPORARY
-    ObjectTransform backgroundTransform = ObjectTransform((Vector2){400.0f,300.0f}, 0, 1);
-    
-    Perlin perlin(1338, 0.02, 0.01);
+    // Transform component of the background texture itself.
+    ObjectTransform backgroundTransform = ObjectTransform((Vector2){500.0f,375.0f}, 0, 1);
+    // Creating the background texture from the world perlin noise.
     TextureGenerator generator = TextureGenerator::makeGenerator(
         {0.43f, 0.44f, 0.45f},
         {{ 30, 30, 40, 255 }, { 80, 80, 100, 255 }, { 15, 15, 20, 255 }},
         screenDimensions
     );
-    Texture2D newBackgroundTexture = generator.generateTexture(perlin);
+    Texture2D newBackgroundTexture = generator.generateTexture(worldGen.getPerlin());
 
+    // Creating renderer for the background textures.
     std::unique_ptr<Drawable> backgroundRenderer = Drawable::makeDrawer(newBackgroundTexture);
-    ObjectTransform testingTransform = ObjectTransform((Vector2){400.0f,300.0f}, 0, 2);
+
+    // Creating transform for a test obstacle.
+    ObjectTransform testingTransform = ObjectTransform((Vector2){500.0f,375.0f}, 0, 2);
+    // And it's shape.
     std::unique_ptr<Shape> shape = Shape::makePolygon((std::vector<Vector2>)
     {
         {  0.0f, -80.0f }, // 0: Blade tip
@@ -79,13 +71,14 @@ int main()
     { 0.0f, 0.0f }         // Origin at the hilt center
     );
 
+    // Create obstacle from shape and transform.
     Obstacle obstacle = Obstacle::makeObstacle(std::move(shape), testingTransform, LIGHTGRAY);
 
     // Line vector to store world vertices for collision detection.
-    std::vector<Line> borders = world.GetVertices();
+    // std::vector<Line> borders = world.GetVertices();
 
     // Navmesh object generated from borders.
-    Navmesh navmesh(borders);
+    // Navmesh navmesh(borders);
 
     // Logic and input parameters for event handling.
     bool needsRefresh = false;
@@ -117,16 +110,106 @@ int main()
         if (IsKeyDown(KEY_S))           { player.UpdateWithKeys(90); }
 
         // World perlin scale control.
-        if (IsKeyPressed(KEY_LEFT))     { world.SetScale(world.GetScale() - 0.005); needsRefresh = true; }
-        if (IsKeyPressed(KEY_RIGHT))    { world.SetScale(world.GetScale() + 0.005); needsRefresh = true; }
+        if (IsKeyPressed(KEY_LEFT))     
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed, tmpScale - 0.005, tmpPer, tmpThresh);
+            needsRefresh = true; 
+        }
+        if (IsKeyPressed(KEY_RIGHT))
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed, tmpScale + 0.005, tmpPer, tmpThresh);
+            needsRefresh = true; 
+        }
 
         // World perlin seed control.
-        if (IsKeyPressed(KEY_DOWN))     { world.SetSeed(world.GetSeed() - 1); needsRefresh = true; }
-        if (IsKeyPressed(KEY_UP))       { world.SetSeed(world.GetSeed() + 1); needsRefresh = true; }
+        if (IsKeyPressed(KEY_DOWN))
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed - 1, tmpScale, tmpPer, tmpThresh);
+            needsRefresh = true; 
+        }
+        if (IsKeyPressed(KEY_UP))
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed + 1, tmpScale, tmpPer, tmpThresh);
+            needsRefresh = true; 
+        }
         
         // World perlin threshold control. (Also world vertices).
-        if (IsKeyPressed(KEY_LEFT_BRACKET))        { world.SetThreshold(world.GetThreshold() - 0.01); needsRefresh = true; }
-        if (IsKeyPressed(KEY_RIGHT_BRACKET))        { world.SetThreshold(world.GetThreshold() + 0.01); needsRefresh = true; }
+        if (IsKeyPressed(KEY_LEFT_BRACKET))
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed, tmpScale, tmpPer, tmpThresh - 0.01);
+            needsRefresh = true; 
+        }
+        if (IsKeyPressed(KEY_RIGHT_BRACKET))
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed, tmpScale, tmpPer, tmpThresh + 0.01);
+            needsRefresh = true; 
+        }
         
         // World edges array visualisation control.
         if (IsKeyPressed(KEY_E))        { showedges = !showedges; }
@@ -166,34 +249,47 @@ int main()
         // Mouse position for cursor coordinate display.
         mousePos = GetMousePosition();
 
-        // 2.2 Updates and logic.
-        // ---------------------
-
         // Persistence update based on mousewheel movement.
         if (wheelMove != 0.0f) 
-        {
-            // Update world persistence.
-            world.SetPersistence(world.GetPersistence() + (wheelMove * 0.05));
-            needsRefresh = true;
+        { 
+            // Any change to base perlin noise is an automatic world generation reset.
+            // We have to grab all of the base values and reset with the single desired change.
+            // This is for testing purposes as usually one would directly reset world generation,
+            // only if the actual game world needs changing. 
+            // Example : loading new game, or loading a new area possibly.
+            uint32_t tmpSeed = worldGen.getPerlin().getSeed();
+            double tmpScale = worldGen.getPerlin().getScale();
+            double tmpPer = worldGen.getPerlin().getPersistence();
+            float tmpThresh = worldGen.getWorld().getThreshold();
+
+            // World generation pipeline reset.
+            worldGen.reset(tmpSeed, tmpScale, tmpPer + (wheelMove * 0.02), tmpThresh);
+            needsRefresh = true; 
         }
+
+        // 2.2 Updates and logic.
+        // ---------------------
 
         // Refresh world object in case of parameter change.
         if (needsRefresh) 
         {
             // Delete old texture and create new one, also refrech world vertices array.
-            UnloadTexture(backgroundTexture);
-            backgroundTexture = world.Refresh(screenDimensions);
+            UnloadTexture(newBackgroundTexture);
 
-            backgroundRenderer = Drawable::makeDrawer(backgroundTexture);
+            newBackgroundTexture = generator.generateTexture(worldGen.getPerlin());
 
-            borders = world.GetVertices();
-            navmesh = Navmesh(borders);
+            // world.Refresh(screenDimensions);
+
+            backgroundRenderer = Drawable::makeDrawer(newBackgroundTexture);
+
+            // borders = world.GetVertices();
+            // navmesh = Navmesh(borders);
 
             needsRefresh = false;
         }
 
         // Player object is the only object requiring continues unconditional updates. 
-        player.update(spawnedBoxes, borders);
+        //player.update(spawnedBoxes, borders);
 
 
         // 2.3 Drawing
@@ -206,30 +302,28 @@ int main()
 
             if (showbackground) 
             {
+                
                 // Draw background perlin noise based texture, if turned on.
                 backgroundRenderer->draw(backgroundTransform);
             }
 
             // Draw world grid, if turned on.
-            if (showgrid) { world.DrawGrid(); }
+            // if (showgrid) { world.DrawGrid(); }
 
             // Draw navmesh from navmesh object, if turned on.
-            if (shownavmesh) { navmesh.DrawNavmesh(); }
+            // if (shownavmesh) { navmesh.DrawNavmesh(); }
 
             // Draw vertices from world object, if turned on.
-            if (showedges) { world.Draw(); }
+            // if (showedges) { world.Draw(); }
 
             // Draw edge line points, if turned on.
-            if (showpoints) { navmesh.DrawPoints(); }
-
-            // Draw user spawned box obstacles.
-            for (Box box : spawnedBoxes) { box.Draw(); }
+            // if (showpoints) { navmesh.DrawPoints(); }
 
             // Draw cursor location, if turned on.
             if (showcursor) 
             {
                 DrawText(
-                    TextFormat("%.f, %.f, %.2f", mousePos.x, mousePos.y, world.SampleNoise(mousePos.x, mousePos.y)), mousePos.x + 7, mousePos.y - 13, 16, WHITE
+                    TextFormat("%.f, %.f, %.2f", mousePos.x, mousePos.y, worldGen.getPerlin().sampleNoise(mousePos.x, mousePos.y)), mousePos.x + 7, mousePos.y - 13, 16, WHITE
                 );
             }
 
@@ -237,8 +331,9 @@ int main()
             if (showinfo) 
             {
                 DrawText(
-                    TextFormat("Seed: %u | Scale: %.4f | Threshold: %.2f | Persistence: %.4f", 
-                        world.GetSeed(), world.GetScale(), world.GetThreshold(), world.GetPersistence()),
+                    TextFormat("Seed: %u | Scale: %.3f | Persistence: %.2f | Threshold: %.2f", 
+                        worldGen.getPerlin().getSeed(), worldGen.getPerlin().getScale(), 
+                        worldGen.getPerlin().getPersistence(), worldGen.getWorld().getThreshold()),
                     20, 20, 20, WHITE
                 );
 
@@ -247,13 +342,13 @@ int main()
                         (showgrid) ? "on" : "off", (showedges) ? "on" : "off",
                         (showpoints) ? "on" : "off", (shownavmesh) ? "on" : "off",
                         (showcursor) ? "on" : "off", (showbackground) ? "on" : "off"),
-                     20, 450, 20, WHITE
+                     20, 600, 20, WHITE
                 );
 
             }
 
             // Draw the player on top of everything else.
-            player.Draw();
+            // player.Draw();
             obstacle.draw();
         
             EndDrawing();
@@ -264,7 +359,7 @@ int main()
     // ----------------------
 
     // Free up textures
-    UnloadTexture(backgroundTexture);
+    UnloadTexture(newBackgroundTexture);
     
     // Window close and program exit.
     CloseWindow();

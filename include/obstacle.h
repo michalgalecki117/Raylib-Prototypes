@@ -15,14 +15,22 @@ private:
     std::unique_ptr<Shape> collisionShape;
     // Stores its position, rotation and scale.
     ObjectTransform transform;
+    // Logic flag for collision checks.
+    bool collider;
+    // Logic flag for world edges creation.
+    bool overrideTerrain;
 
     // Constructor with variables kept private for safe obstacle building.
-    Obstacle(std::unique_ptr<Drawable> renderer, std::unique_ptr<Shape> collisionShape, ObjectTransform transform);
+    Obstacle(std::unique_ptr<Drawable> renderer, std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider = true, bool overrideTerrain = false);
 
 public:
     // Public Obstacle factories for safe building.
     static Obstacle makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, Color color = BLACK);
     static Obstacle makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform);
+    static Obstacle makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, Color color = BLACK);
+    static Obstacle makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform,  bool collider);
+    static Obstacle makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, bool overrideTerrain, Color color = BLACK);
+    static Obstacle makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform,  bool collider, bool overrideTerrain);
 
     // Simple Getters and Setters.
     ObjectTransform getTransform() const { return transform; }
