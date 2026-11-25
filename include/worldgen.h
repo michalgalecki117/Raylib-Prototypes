@@ -65,6 +65,8 @@ private:
     int cellSize;
     // Version for pipeline control.
     int version;
+    // And parent version too.
+    int lastSeenVersion;
 
     // Private constructor for safety.
     World(const Perlin& perlin, float threshold, std::vector<Obstacle> obstacles, Vector2 dimensions, int cellSize);
@@ -86,6 +88,9 @@ private:
     size_t addUniquePoint(Vector2 point, float epsilon);
     bool isInsideBorder(Vector2 pt, float minP, float maxX, float maxY);
 
+    // Marching squares edge-detection.
+    void generateEdgesFromNoise();
+
 public:
     // Public factories.
     static World makeWorld(const Perlin& perlin, float threshold, Vector2 dimensions, int cellSize = 15);
@@ -103,24 +108,46 @@ public:
     std::vector<Vector2> getUniquePoints() const { return points; }
     std::vector<std::pair<size_t, size_t>> getEdges() const { return edges; }
 
-    // Marching squares edge-detection.
-    void generateEdgesFromNoise();
+    // Update function to reset in case of parent version increment.
+    void update();
 };
 
 
 class Navmesh // Creates and stores world navmesh.
 {
 private :
+    // Reference to world from which the navmesh is made.
+    const World& world;
     // Vector to store our navmesh triangles in.
     std::vector<CDT::Triangle> triangles;
     // And also the set of triangle corners for later navigation.
     std::vector<CDT::V2d<double>> points;
+    // Version for pipeline control.
+    int version;
+    // And parent version too.
+    int lastSeenVersion;
+
     // Private constructor for safety of data.
     Navmesh(const World& world);
+
+    // Private conversion helper functions.
+    Vector2 getVectorFromV2d(CDT::V2d<double> v2d) const;
+    CDT::V2d<double> getV2dFromVector(Vector2 vector) const;
+    
+    // CDT triangulation for mesh building.
+    void generateMeshFromWorld();
 
 public :
     // Public factories.
     static Navmesh makeNavmesh(const World& world);
+
+    // Simple Getters and Setters.
+    std::vector<CDT::Triangle> getTriangles() const { return triangles; }
+    std::vector<CDT::V2d<double>> getPoints() const { return points; }
+    int getVersion() const { return version; }
+
+    // Update function to reset in case of parent version increment.
+    void update();
 };
 
 
@@ -147,4 +174,5 @@ public:
     // Simple Getters and Setters.
     const Perlin& getPerlin() const { return perlin; }
     const World& getWorld() const { return world; }
+    const Navmesh& getNavmesh(float key = 0.0f) const;
 };

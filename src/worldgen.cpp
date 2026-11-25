@@ -48,6 +48,7 @@ World::World(const Perlin& perlin, float threshold, std::vector<Obstacle> obstac
 {
     // Initialize version and generate edges.
     version = 1;
+    lastSeenVersion = perlin.getVersion();
     generateEdgesFromNoise();
 }
 
@@ -244,7 +245,7 @@ void World::generateEdgesFromNoise()
     size_t index1;
     size_t index2;
     // Epsilon to equate points to each other based off of cellSize.
-    float epsilon = cellSize / 20;
+    float epsilon = static_cast<float>(cellSize) / 20.0f;
 
     // Define the four corners of the world;
     float minP = static_cast<float>(cellSize);
@@ -357,6 +358,127 @@ void World::generateEdgesFromNoise()
     buildBorderSegments(LeftIntersects, topLeft, bottomLeft, false);     // Left: sorted by Y
 }
 
+// Update function.
+void World::update() 
+{
+    // Do nothing if parent not modified.
+    if (lastSeenVersion == perlin.getVersion()) { return; }
+    // Reset edges otherwise.
+    generateEdgesFromNoise();
+    // And increment version.
+    version++;
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------
+// Navmesh Class. 
+//-------------------------------------------------------------------------------------------------------------------------------
+
+// Private constructor.
+Navmesh::Navmesh(const World& world)
+    : world(world)
+{
+    // Initialise object version.
+    version = 1;
+    // And parent version.
+    lastSeenVersion = world.getVersion();
+
+    generateMeshFromWorld();
+}
+
+// Helper conversion functions. 
+Vector2 Navmesh::getVectorFromV2d(CDT::V2d<double> v2d) const
+{
+    return { static_cast<float>(v2d.x), static_cast<float>(v2d.y) };
+}
+
+CDT::V2d<double> Navmesh::getV2dFromVector(Vector2 vector) const
+{
+    return CDT::V2d<double>{
+        static_cast<double>(vector.x),
+        static_cast<double>(vector.y)
+    };
+}
+
+void Navmesh::generateMeshFromWorld() 
+{
+    // Get unique points from world reference.
+    const std::vector<Vector2>& worldPoints = world.getUniquePoints();
+    // And all edges aswell.
+    const std::vector<std::pair<size_t, size_t>>& worldEdges = world.getEdges();
+    if (worldPoints.empty() || worldEdges.empty()) { return; }
+
+    // Temporary vector for mesh construction.
+    std::vector<CDT::V2d<double>> cdtPoints;
+
+    // Temporary vector for mesh construction.
+    std::vector<CDT::Edge> cdtEdges;
+
+    // Convert all unique points to CDT::V2d<double> format.
+    for (const Vector2& point : worldPoints) 
+    {
+        cdtPoints.push_back(CDT::V2d<double>
+        {
+            static_cast<double>(point.x),
+            static_cast<double>(point.y)
+        });
+    }
+
+    // Convert from worldEdges to CDT::Edges.
+    for (const std::pair<size_t, size_t>& edge : worldEdges) 
+    {
+        cdtEdges.push_back(CDT::Edge
+            {
+                static_cast<CDT::VertInd>(edge.first), 
+                static_cast<CDT::VertInd>(edge.second)
+            });
+    }
+
+    // Initialising CDT triangulation.
+    CDT::Triangulation<double> cdt(
+        CDT::VertexInsertionOrder::Auto,
+        CDT::IntersectingConstraintEdges::TryResolve,
+        0.0
+    );
+
+    // Inserting our found points to find where triangle edges can possibly connect.
+    cdt.insertVertices(cdtPoints);
+    // Inserting our found edges to block triangles from passing through walls.
+    cdt.insertEdges(cdtEdges);
+
+    CDT::TriIndUSet toErase = cdt.collectOuterTrianglesAndHoles();
+    cdt.refineTriangles(
+        CDT::VertInd(10000),
+        CDT::RefinementCriterion::SmallestAngle,
+        CDT::degToRad(20.),
+        &toErase);
+    
+    cdt.finalizeTriangulation(toErase);
+    // Erasing Super Triangle above everything to get a proper mesh.
+    // Also erasing Outer Triangles (out of bounds).
+    // Also erasing holes in the map where the player cannot pass. (Between closed edge loops)
+    // cdt.eraseOuterTrianglesAndHoles();
+    // Initialising class variables from CDT generated results.
+    triangles = cdt.triangles;
+    points = cdt.vertices;
+}
+
+// Public factories.
+Navmesh Navmesh::makeNavmesh(const World& world) 
+{
+    return Navmesh(world);
+}
+
+// Update function.
+void Navmesh::update() 
+{
+    // Do nothing if parent not modified.
+    if (lastSeenVersion == world.getVersion()) { return; }
+    // Reset mesh otherwise.
+    generateMeshFromWorld();
+    // And increment version.
+    version++;
+}
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // WorldGen Class. 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -365,7 +487,9 @@ void World::generateEdgesFromNoise()
 WorldGen::WorldGen(uint32_t seed, double scale, double persistence, float threshold, Vector2 dimensions, int cellSize)
     : perlin(Perlin(seed, scale, persistence)),
     world(World::makeWorld(this->perlin, threshold, dimensions, cellSize))
-{}
+{
+    meshes.emplace(0.0f, Navmesh::makeNavmesh(world));
+}
 
 // Public WorldGen factory.
 WorldGen WorldGen::makeNew(uint32_t seed, double scale, double persistence, float threshold, Vector2 dimensions, int cellSize)
@@ -385,5 +509,19 @@ void WorldGen::reset(uint32_t seed, double scale, double persistence, float thre
     
     // Resetting world edges.
     world.setThreshold(threshold);
-    world.generateEdgesFromNoise();
+    world.update();
+
+    // Resetting meshes.
+    meshes.at(0.0f).update();
+}
+
+// Special getter for navmesh since it requires being called by key.
+// By default we should not add an empty mesh if an invalid key is called.
+// Instead we return the default 0.0f mesh.
+const Navmesh& WorldGen::getNavmesh(float key) const 
+{
+    // Only return the found mesh if it exists.
+    if (meshes.find(key) != meshes.end()) { return meshes.at(key); }
+    // Return the default one otherwise.
+    return meshes.at(0.0f);
 }

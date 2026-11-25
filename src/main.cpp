@@ -48,40 +48,6 @@ int main()
     // Creating renderer for the background textures.
     std::unique_ptr<Drawable> backgroundRenderer = Drawable::makeDrawer(newBackgroundTexture);
 
-    // Creating transform for a test obstacle.
-    ObjectTransform testingTransform = ObjectTransform((Vector2){500.0f,375.0f}, 0, 2);
-    // And it's shape.
-    std::unique_ptr<Shape> shape = Shape::makePolygon((std::vector<Vector2>)
-    {
-        {  0.0f, -80.0f }, // 0: Blade tip
-        {  6.0f, -60.0f }, // 1: Upper blade right
-        {  6.0f, -10.0f }, // 2: Lower blade right
-        { 28.0f, -10.0f }, // 3: Crossguard right tip
-        { 28.0f, -4.0f  }, // 4: Crossguard right base
-        {  4.0f, -4.0f  }, // 5: Hilt right top
-        {  4.0f,  25.0f }, // 6: Hilt right bottom
-        {  9.0f,  32.0f }, // 7: Pommel right
-        {  0.0f,  38.0f }, // 8: Pommel bottom tip
-        { -9.0f,  32.0f }, // 9: Pommel left
-        { -4.0f,  25.0f }, // 10: Hilt left bottom
-        { -4.0f, -4.0f  }, // 11: Hilt left top
-        {-28.0f, -4.0f  }, // 12: Crossguard left base
-        {-28.0f, -10.0f }, // 13: Crossguard left tip
-        { -6.0f, -10.0f }, // 14: Lower blade left
-        { -6.0f, -60.0f }  // 15: Upper blade left
-    },
-    { 0.0f, 0.0f }         // Origin at the hilt center
-    );
-
-    // Create obstacle from shape and transform.
-    Obstacle obstacle = Obstacle::makeObstacle(std::move(shape), testingTransform, LIGHTGRAY);
-
-    // Line vector to store world vertices for collision detection.
-    // std::vector<Line> borders = world.GetVertices();
-
-    // Navmesh object generated from borders.
-    // Navmesh navmesh(borders);
-
     // Logic and input parameters for event handling.
     bool needsRefresh = false;
     // For redrawing the world with a different edge detection threshold.
@@ -242,17 +208,6 @@ int main()
         // Control display of cursor location.
         if (IsKeyPressed(KEY_C))        { showcursor = !showcursor; }
 
-        // TEMPORARY TESTING
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) 
-        {
-            obstacle.rotateBy(1);
-        }
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) 
-        {
-            obstacle.rotateBy(-1);
-        }
-
         // Mouse wheel movement for world perlin persistence control.
         wheelMove = GetMouseWheelMove();
 
@@ -294,12 +249,7 @@ int main()
             generator = TextureGenerator::makeGenerator(shiftedThresholds, colors, screenDimensions);
             newBackgroundTexture = generator.generateTexture(worldGen.getPerlin());
 
-            // world.Refresh(screenDimensions);
-
             backgroundRenderer = Drawable::makeDrawer(newBackgroundTexture);
-
-            // borders = world.GetVertices();
-            // navmesh = Navmesh(borders);
 
             needsRefresh = false;
         }
@@ -328,12 +278,41 @@ int main()
             { 
                 // Purely for visualisation, create grid from cellSize to demonstrate function of Marching Squares.
                 for (float x = 0; x < screenDimensions.x; x += 15) { DrawLineV({x, 0}, {x, screenDimensions.y}, {100,100,100,200}); }
-                for (float y = 0; y < screenDimensions.y; y += 15) { DrawLineV({0, y}, {screenDimensions.x, y}, {100,100,100,200}); } 
-                
+                for (float y = 0; y < screenDimensions.y; y += 15) { DrawLineV({0, y}, {screenDimensions.x, y}, {100,100,100,200}); }
             }
 
             // Draw navmesh from navmesh object, if turned on.
-            // if (shownavmesh) { navmesh.DrawNavmesh(); }
+            if (shownavmesh) 
+            { 
+                const Navmesh mesh = worldGen.getNavmesh(0.0f);
+                std::vector<CDT::V2d<double>> meshPoints = mesh.getPoints();
+                std::vector<CDT::Triangle> meshTriangles = mesh.getTriangles();
+
+                // Gets every CDT triangle in navmesh.
+                for (const CDT::Triangle &t : meshTriangles)
+                {
+                    // Get all 3 indexes of the triangle points.
+                    size_t i0 = t.vertices[0];
+                    size_t i1 = t.vertices[1];
+                    size_t i2 = t.vertices[2];
+
+                    // Get the actual V2d point from points based on index.
+                    const CDT::V2d<double> pt0 = meshPoints[i0];
+                    const CDT::V2d<double> pt1 = meshPoints[i1];
+                    const CDT::V2d<double> pt2 = meshPoints[i2];
+
+                    // Convert V2d point to Vector2 point to allow drawing.
+                    Vector2 v0 = {static_cast<float>(pt0.x), static_cast<float>(pt0.y)};
+                    Vector2 v1 = {static_cast<float>(pt1.x), static_cast<float>(pt1.y)};
+                    Vector2 v2 = {static_cast<float>(pt2.x), static_cast<float>(pt2.y)};
+
+                    // Draw actual triangle overlay.
+                    DrawTriangle(v0, v2, v1, {50, 100, 50, 50});
+                    // Draw triangle edge lines to differentiate between triangles.
+                    DrawTriangleLines(v0, v2, v1, {100, 200, 100, 100});
+                }
+
+            }
 
             // Draw vertices from world object, if turned on.
             if (showedges) 
@@ -384,12 +363,10 @@ int main()
 
             // Draw the player on top of everything else.
             // player.Draw();
-            obstacle.draw();
         
             EndDrawing();
     }
     
-
     // 3. Unloading and Exit.
     // ----------------------
 
