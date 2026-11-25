@@ -2,8 +2,6 @@
 #include <vector>
 #include <memory>
 
-#include "player.h"
-
 #include "worldgen.h"
 #include "rendering.h"
 #include "transform.h"
@@ -23,7 +21,7 @@ int main()
     Vector2 screenDimensions = { (float)screenWidth, (float)screenHeight };
     
     // Player object initialisation.
-    Player player = Player({75,75}, 5, GOLD, 0, 90);
+    /* Player player = Player({75,75}, 5, GOLD, 0, 90); */
     
     // Window initialisation.
     InitWindow(screenWidth, screenHeight, "Prototype");
@@ -78,10 +76,10 @@ int main()
         // --------------------------------
 
         // Player movement.
-        if (IsKeyDown(KEY_A))           { player.UpdateWithKeys(180); }
+/*         if (IsKeyDown(KEY_A))           { player.UpdateWithKeys(180); }
         if (IsKeyDown(KEY_W))           { player.UpdateWithKeys(270); }
         if (IsKeyDown(KEY_D))           { player.UpdateWithKeys(0); }
-        if (IsKeyDown(KEY_S))           { player.UpdateWithKeys(90); }
+        if (IsKeyDown(KEY_S))           { player.UpdateWithKeys(90); } */
 
         // World perlin scale control.
         if (IsKeyPressed(KEY_LEFT))     

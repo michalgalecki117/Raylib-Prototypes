@@ -23,9 +23,6 @@ std::unique_ptr<Shape> Shape::makeLine(Vector2 pos1, Vector2 pos2)
 
 std::unique_ptr<Shape> Shape::makePolygon(std::vector<Vector2> vertices, Vector2 origin) 
 {
-    // Create mesh struct to hold the polygon mesh.
-    mesh::Mesh mesh;
-
     // Vector to hold points of cdt format.
     std::vector<CDT::V2d<double>> cdtPoints;
 
@@ -58,8 +55,8 @@ std::unique_ptr<Shape> Shape::makePolygon(std::vector<Vector2> vertices, Vector2
 
     // Fill mesh with unconstrained delaunay triangulation.
     // I.E triangles to connect all edges.
-    mesh.points = cdt.vertices;
-    mesh.triangles = cdt.triangles;
+    std::vector<CDT::V2d<double>> points = cdt.vertices;
+    std::vector<CDT::Triangle> triangles = cdt.triangles;
     
-    return std::unique_ptr<Shape>(new TPolygon(mesh, origin));
+    return std::unique_ptr<Shape>(new TPolygon(points, triangles, origin));
 }

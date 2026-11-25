@@ -43,7 +43,7 @@ double Perlin::sampleNoise(int x, int y) const { return m_perlin.normalizedOctav
 //-------------------------------------------------------------------------------------------------------------------------------
 
 // Private constructor. Sets up the perlin reference, the obstacles vector aswell as the variables used for edge-detection.
-World::World(const Perlin& perlin, float threshold, std::vector<Obstacle> obstacles, Vector2 dimensions, int cellSize)
+World::World(const Perlin& perlin, float threshold, std::vector<GameObject> obstacles, Vector2 dimensions, int cellSize)
     : perlin(perlin), threshold(threshold), obstacles(std::move(obstacles)), dimensions(dimensions), cellSize(cellSize)
 {
     // Initialize version and generate edges.
@@ -54,15 +54,15 @@ World::World(const Perlin& perlin, float threshold, std::vector<Obstacle> obstac
 
 // Public factories. 
 // Public factory of world, uses a premade vector of obstacles.
-World World::makeWorld(const Perlin& perlin, float threshold, std::vector<Obstacle> obstacles, Vector2 dimensions, int cellSize) 
+World World::makeWorld(const Perlin& perlin, float threshold, std::vector<GameObject> obstacles, Vector2 dimensions, int cellSize) 
 {
     return World(perlin, threshold, std::move(obstacles), dimensions, cellSize);
 }
 
 // Public factory of world, uses a single obstacle object at initialisation.
-World World::makeWorld(const Perlin& perlin, float threshold, Obstacle obstacle, Vector2 dimensions, int cellSize) 
+World World::makeWorld(const Perlin& perlin, float threshold, GameObject obstacle, Vector2 dimensions, int cellSize) 
 {
-    std::vector<Obstacle> obstacles;
+    std::vector<GameObject> obstacles;
     obstacles.push_back(std::move(obstacle));
     return makeWorld(perlin, threshold, std::move(obstacles), dimensions, cellSize);
 }

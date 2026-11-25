@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include <cmath>
-#include "mesh.h"
+#include "CDT/CDT.h"
 
 // Factory function of Drawable interface. 
 // It makes the ShapeDrawer when provided a color and shape.
@@ -123,11 +123,12 @@ void ShapeDrawer::draw(const ObjectTransform& transform)
 
     if (const auto* polygon = dynamic_cast<const TPolygon*>(&shape)) 
     {
-        const mesh::Mesh& mesh = polygon->getMesh();
+        const std::vector<CDT::V2d<double>>& points = polygon->getPoints();
+        const std::vector<CDT::Triangle>& triangles = polygon->getTriangles();
         middle = polygon->getOrigin();
 
         // Gets every CDT triangle in mesh.
-        for (const CDT::Triangle& t : mesh.triangles) 
+        for (const CDT::Triangle& t : triangles) 
         {
             // Get all 3 indexes of the triangle points.
             size_t i0 = t.vertices[0];
@@ -135,9 +136,9 @@ void ShapeDrawer::draw(const ObjectTransform& transform)
             size_t i2 = t.vertices[2];
     
             // Get the actual V2d point from points based on index.
-            const CDT::V2d<double> pt0 = mesh.points[i0];
-            const CDT::V2d<double> pt1 = mesh.points[i1];
-            const CDT::V2d<double> pt2 = mesh.points[i2];
+            const CDT::V2d<double> pt0 = points[i0];
+            const CDT::V2d<double> pt1 = points[i1];
+            const CDT::V2d<double> pt2 = points[i2];
 
             // Convert V2d point to Vector2 point to allow drawing.
             Vector2 v0 = translateVertex({ static_cast<float>(pt0.x), static_cast<float>(pt0.y) });

@@ -2,7 +2,7 @@
 #include "raylib.h"
 #include <memory>
 #include <vector>
-#include "mesh.h"
+#include "CDT/CDT.h"
 
 class Shape // Shape Interface
 {
@@ -146,15 +146,18 @@ public:
 class TPolygon : public Shape
 {
 private:
+    // And also the set of triangle corners.
+    std::vector<CDT::V2d<double>> points;
+    // Vector to store our mesh triangles in.
+    std::vector<CDT::Triangle> triangles;
     // By itself, a polygon shape only has it's n vertices.
     // In addition, we save the position of the midpoint.
     Vector2 origin;
-    mesh::Mesh mesh;
 
     // Keeping the constructor private.
     // Only the interface factory method can create a new Polygon.
-    TPolygon(mesh::Mesh mesh, Vector2 origin)
-        : origin(origin), mesh(mesh)
+    TPolygon(std::vector<CDT::V2d<double>> points, std::vector<CDT::Triangle> triangles, Vector2 origin)
+        :  points(points), triangles(triangles), origin(origin)
     {}
 
     // Permit access to constructor only to Shape factory.
@@ -162,6 +165,7 @@ private:
 
 public:
     // Simple Getters and Setters.
-    mesh::Mesh getMesh() const { return mesh; }
+    std::vector<CDT::Triangle> getTriangles() const { return triangles; }
+    std::vector<CDT::V2d<double>> getPoints() const { return points; }
     Vector2 getOrigin() const { return origin; }
 };

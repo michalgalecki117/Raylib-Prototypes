@@ -13,13 +13,13 @@ classDiagram
         -Texture2D texture
         -unique_ptr~Shape~ collisionShape
         -MovementCore movement
-        -Transform transform
+        -ObjectTransform transform
         +update()
     }
     
     Player *-- Drawable : owns
     Player *-- Shape : owns
-    Player *-- Transform : owns
+    Player *-- ObjectTransform : owns
     Player *-- MovementCore : owns
 
     class Agent {
@@ -27,16 +27,16 @@ classDiagram
         -Texture2D texture
         -unique_ptr~Shape~ collisionShape
         -PathingCore pathing
-        -Transform transform
+        -ObjectTransform transform
         +update()
     }
 
     Agent *-- Drawable : owns
     Agent *-- Shape : owns
-    Agent *-- Transform : owns
+    Agent *-- ObjectTransform : owns
     Agent *-- PathingCore : owns
 
-    class Transform {
+    class ObjectTransform {
         -Vector2 position
         -float rotation
         -float scale
@@ -62,27 +62,30 @@ classDiagram
 
     PathingCore --> Navmesh : references
 
-    class Obstacle {
+    class GameObject {
         -unique_ptr~Drawable~ renderer
         -unique_ptr~Shape~ collisionShape
-        -Transform transform
+        -ObjectTransform transform
         -bool collider
         -bool overrideTerrain
+        +makeGameObject(collisionShape, transform...) GameObject
         +rotateTo(float angle)
         +rotateBy(float angle, bool clockwise)
         +moveTo(Vector2 position)
         +moveBy(float distance)
     }
 
-    Obstacle *-- Drawable : owns
-    Obstacle *-- Shape : owns
-    Obstacle *-- Transform : owns
+    GameObject *-- Drawable : owns
+    GameObject *-- Shape : owns
+    GameObject *-- ObjectTransform : owns
 
     class WorldGen {
         -Perlin perlin
-        -World edges
-        -Navmesh navmesh
-        +generate(uint32_t seed, double scale, double persistence)
+        -World world
+        -map<float, Navmesh> meshes
+        +makeNew(seed, scale, persistence, threshold, dimensions, cellSize)
+        +reset(seed, scale, persistence, threshold)
+        +getNavmesh(float key) const Navmesh&
     }
 
     WorldGen *-- Perlin : owns
@@ -90,10 +93,16 @@ classDiagram
     WorldGen *-- Navmesh : owns
 
     class Navmesh {
+        -const World& world
         -vector~CDT::Triangle~ triangles
-        -vector~CDT::V2d~double~~ vertices
-        -World& edges
-        +generateMesh(const World& edges)
+        -vector~CDT::V2d~double~~ points
+        -int version
+        -int lastSeenVersion
+        -getVectorFromV2d(CDT::V2d<double> v2d) const Vector2
+        -getV2dFromVector(Vector2 vector) const CDT::V2d<double>
+        -generateMeshFromWorld()
+        +makeNavmesh(const World& world) Navmesh
+        +update()
     }
 
     Navmesh --> World : depends on
@@ -103,83 +112,97 @@ classDiagram
         -uint32_t seed
         -double scale
         -double persistence
+        -int version
         +sampleNoise(int, int) double
     }
 
     class World {
-        -vector~Line~ edges
-        -vector~Obstacle~ obstacles
         -Perlin& perlin
-        +generateWorld()
+        -vector~Vector2~ points
+        -vector~pair~size_t,size_t~~ edges
+        -float threshold
+        -vector~GameObject~ obstacles
+        -Vector2 dimensions
+        -int cellSize
+        -int version
+        -int lastSeenVersion
+        -interpolatePoints(p1, p2, v1, v2, dimensions) const Vector2
+        -buildBorderSegments(pts, cornerA, cornerB, sortX)
+        -addUniquePoint(Vector2 point, float epsilon) size_t
+        -isInsideBorder(pt, minP, maxX, maxY) bool
+        -generateEdgesFromNoise()
+        +makeWorld(perlin, threshold, dimensions, cellSize) World
+        +update()
     }
 
     World <-- Perlin : depend on
-    World *-- Obstacle : owns
+    World o-- GameObject : has
 
     class Drawable {
         <<Interface>>
-        +draw(const Transform& transform)
+        +draw(const ObjectTransform& transform)
     }
 
     class ShapeDrawer {
         -Color color
         -const Shape& shape 
-        +draw(const Transform& transform)
+        +draw(const ObjectTransform& transform)
     }
 
     ShapeDrawer --> Shape : references
 
     class TextureDrawer {
-        -const Texture2d texture
-        +draw(const Transform& transform)
+        -const Texture2d& texture
+        +draw(const ObjectTransform& transform)
     }
 
     Drawable <|.. ShapeDrawer : implements
     Drawable <|.. TextureDrawer : implements
 
-        class Shape {
+    class Shape {
         <<Interface>>
-        static makeShape(shape specific parameters) unique_ptr<Shape>
+        static makeShape(shapePoints) unique_ptr<Shape>
     }
 
-    class Circle {
+    class TCircle {
         -float radius
     }
 
-    class Rectangle {
+    class TRectangle {
         -Vector2 middle
         -Vector2 size
     }
 
-    class Line {
+    class TLine {
         -Vector2 middle
-        -Vector2 startPos
-        -Vector2 endPos
+        -Vector2 pos1
+        -Vector2 pos2
     }
 
-    class Triangle {
+    class TTriangle {
         -Vector2 middle
         -Vector2 pos1
         -Vector2 pos2
         -Vector2 pos3
     }
 
-    class Polygon {
+    class TPolygon {
+        -std::vector<CDT::V2d<double>> points
+        -std::vector<CDT::Triangle> triangles
         -Vector2 origin
-        -mesh::Mesh mesh
     }
 
-    Shape <|.. Circle : implements
-    Shape <|.. Rectangle : implements
-    Shape <|.. Polygon : implements
-    Shape <|.. Triangle : implements
-    Shape <|.. Line : implements
+    Shape <|.. TCircle : implements
+    Shape <|.. TRectangle : implements
+    Shape <|.. TPolygon : implements
+    Shape <|.. TTriangle : implements
+    Shape <|.. TLine : implements
 
     class TextureGenerator {
         -map<float, Color> pattern
         -const int width
         -const int height
-        -getColorForNoise(souble noise) const Color
+        -getColorForNoise(double noise) const Color
         +static makeGenerator(pattern, dimensions) TextureGenerator
         +GenerateTexture() Texture2D
     }

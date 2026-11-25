@@ -6,7 +6,7 @@
 
 #include <memory>
 
-class Obstacle // Obstacle class to hold and manage world obstacles.
+class GameObject // GameObject class to hold and manage world obstacles.
 {
 private:
     // Stores renderer for drawing itself.
@@ -21,16 +21,16 @@ private:
     bool overrideTerrain;
 
     // Constructor with variables kept private for safe obstacle building.
-    Obstacle(std::unique_ptr<Drawable> renderer, std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider = true, bool overrideTerrain = false);
+    GameObject(std::unique_ptr<Drawable> renderer, std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider = true, bool overrideTerrain = false);
 
 public:
-    // Public Obstacle factories for safe building.
-    static Obstacle makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, Color color = BLACK);
-    static Obstacle makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform);
-    static Obstacle makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, Color color = BLACK);
-    static Obstacle makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform,  bool collider);
-    static Obstacle makeObstacle(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, bool overrideTerrain, Color color = BLACK);
-    static Obstacle makeObstacle(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform,  bool collider, bool overrideTerrain);
+    // Public GameObject factories for safe building.
+    static GameObject makeGameObject(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, Color color = BLACK);
+    static GameObject makeGameObject(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform);
+    static GameObject makeGameObject(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, Color color = BLACK);
+    static GameObject makeGameObject(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform,  bool collider);
+    static GameObject makeGameObject(std::unique_ptr<Shape> collisionShape, ObjectTransform transform, bool collider, bool overrideTerrain, Color color = BLACK);
+    static GameObject makeGameObject(const Texture2D& texture, std::unique_ptr<Shape> collisionShape, ObjectTransform transform,  bool collider, bool overrideTerrain);
 
     // Simple Getters and Setters.
     ObjectTransform getTransform() const { return transform; }

@@ -58,7 +58,7 @@ private:
     // Value threshold for noise, for which edge-detection activates.
     float threshold;
     // All obstacles in world.
-    std::vector<Obstacle> obstacles;
+    std::vector<GameObject> obstacles;
     // Dimensions of world, this determines the absolute cut-off point.
     Vector2 dimensions;
     // Size of marching squares cells, required for edge-detection.
@@ -69,7 +69,7 @@ private:
     int lastSeenVersion;
 
     // Private constructor for safety.
-    World(const Perlin& perlin, float threshold, std::vector<Obstacle> obstacles, Vector2 dimensions, int cellSize);
+    World(const Perlin& perlin, float threshold, std::vector<GameObject> obstacles, Vector2 dimensions, int cellSize);
     
     // Private function for interpolating points based on a given threshold.
     // Basically it finds more accurate points to connect the vertices to rather than just running them through the corners themselves.
@@ -94,8 +94,8 @@ private:
 public:
     // Public factories.
     static World makeWorld(const Perlin& perlin, float threshold, Vector2 dimensions, int cellSize = 15);
-    static World makeWorld(const Perlin& perlin, float threshold, Obstacle obstacle, Vector2 dimensions, int cellSize = 15);
-    static World makeWorld(const Perlin& perlin, float threshold, std::vector<Obstacle> obstacles, Vector2 dimensions, int cellSize = 15);
+    static World makeWorld(const Perlin& perlin, float threshold, GameObject obstacle, Vector2 dimensions, int cellSize = 15);
+    static World makeWorld(const Perlin& perlin, float threshold, std::vector<GameObject> obstacles, Vector2 dimensions, int cellSize = 15);
 
     // Simple Getters and Setters.
     float getThreshold() const { return threshold; }
