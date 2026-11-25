@@ -5,8 +5,9 @@
 #include "worldgen.h"
 #include "rendering.h"
 #include "transform.h"
-#include "obstacle.h"
+#include "gameObject.h"
 #include "textureGenerator.h"
+#include "player.h"
 
 // Main function called at launch.
 int main() 
@@ -21,8 +22,12 @@ int main()
     Vector2 screenDimensions = { (float)screenWidth, (float)screenHeight };
     
     // Player object initialisation.
-    /* Player player = Player({75,75}, 5, GOLD, 0, 90); */
+    std::unique_ptr<Shape> playerShape = Shape::makeCircle(5);
+    ObjectTransform playerTransform = ObjectTransform((Vector2){75.0f,75.0f}, 0, 1);
+    std::unique_ptr<Player> player = Player::makePlayer(std::move(playerShape), playerTransform, GOLD);
     
+    const Drawable& playerRenderer = player->getRenderer();
+
     // Window initialisation.
     InitWindow(screenWidth, screenHeight, "Prototype");
     // TargetFPS to detatch fps from machine performance.
@@ -76,10 +81,12 @@ int main()
         // --------------------------------
 
         // Player movement.
-/*         if (IsKeyDown(KEY_A))           { player.UpdateWithKeys(180); }
-        if (IsKeyDown(KEY_W))           { player.UpdateWithKeys(270); }
-        if (IsKeyDown(KEY_D))           { player.UpdateWithKeys(0); }
-        if (IsKeyDown(KEY_S))           { player.UpdateWithKeys(90); } */
+        float moveX = 0.0f;
+        float moveY = 0.0f;
+        if (IsKeyDown(KEY_A)) moveX -= 1.0f;
+        if (IsKeyDown(KEY_D)) moveX += 1.0f;
+        if (IsKeyDown(KEY_W)) moveY -= 1.0f;
+        if (IsKeyDown(KEY_S)) moveY += 1.0f;
 
         // World perlin scale control.
         if (IsKeyPressed(KEY_LEFT))     
@@ -252,8 +259,15 @@ int main()
             needsRefresh = false;
         }
 
+        if (moveX != 0.0f || moveY != 0.0f)
+            {
+                float angleDeg = std::atan2(moveY, moveX) * (180.0f / PI);
+                player->setTargetDirectionDegrees(angleDeg);
+                player->setSpeed(2.0f);
+            }
+
         // Player object is the only object requiring continues unconditional updates. 
-        //player.update(spawnedBoxes, borders);
+        player->update();
 
 
         // 2.3 Drawing
@@ -282,9 +296,9 @@ int main()
             // Draw navmesh from navmesh object, if turned on.
             if (shownavmesh) 
             { 
-                const Navmesh mesh = worldGen.getNavmesh(0.0f);
-                std::vector<CDT::V2d<double>> meshPoints = mesh.getPoints();
-                std::vector<CDT::Triangle> meshTriangles = mesh.getTriangles();
+                const Navmesh& mesh = worldGen.getNavmesh(0.0f);
+                const std::vector<CDT::V2d<double>>& meshPoints = mesh.getPoints();
+                const std::vector<CDT::Triangle>& meshTriangles = mesh.getTriangles();
 
                 // Gets every CDT triangle in navmesh.
                 for (const CDT::Triangle &t : meshTriangles)
@@ -315,8 +329,8 @@ int main()
             // Draw vertices from world object, if turned on.
             if (showedges) 
             {
-                std::vector<Vector2> points = worldGen.getWorld().getUniquePoints();
-                std::vector<std::pair<size_t, size_t>> edges = worldGen.getWorld().getEdges();
+                const std::vector<Vector2>& points = worldGen.getWorld().getUniquePoints();
+                const std::vector<std::pair<size_t, size_t>>& edges = worldGen.getWorld().getEdges();
 
                 for (const std::pair<size_t, size_t> edge : edges) 
                 {
@@ -327,7 +341,7 @@ int main()
             // Draw edge line points, if turned on.
             if (showpoints) 
             { 
-                std::vector<Vector2> points = worldGen.getWorld().getUniquePoints();
+                const std::vector<Vector2>& points = worldGen.getWorld().getUniquePoints();
                 for (const Vector2 point : points) { DrawCircleV(point, 2, BLUE); } 
             }
 
@@ -360,6 +374,7 @@ int main()
             }
 
             // Draw the player on top of everything else.
+            playerRenderer.draw(player->getTransform());
             // player.Draw();
         
             EndDrawing();

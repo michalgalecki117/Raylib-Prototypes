@@ -11,6 +11,8 @@ class GameObject // GameObject class to hold and manage world obstacles.
 private:
     // Stores renderer for drawing itself.
     std::unique_ptr<Drawable> renderer;
+    // Stores texture if it has one.
+    Texture2D texture;
     // Stores its shape, for collisions and drawing.
     std::unique_ptr<Shape> collisionShape;
     // Stores its position, rotation and scale.

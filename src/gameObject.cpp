@@ -1,4 +1,4 @@
-#include "obstacle.h"
+#include "gameObject.h"
 #include <cmath>
 
 // Constructor with variables.

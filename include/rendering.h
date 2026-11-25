@@ -11,7 +11,7 @@ public:
     // Purely virtual function for renderers to inherit.
     // Pass a constant reference to the drawable object's transform,
     // ie position, rotation and so on. Then draw the object.
-    virtual void draw(const ObjectTransform& transform) = 0;
+    virtual void draw(const ObjectTransform& transform) const = 0;
     // Set default destructor just in case.
     virtual ~Drawable() = default;
 
@@ -41,7 +41,7 @@ public:
     // The only job of the ShapeDrawer is to draw the correct shape,
     // in the correct way. As such, all it needs for its draw function,
     // is the position, rotation and scale of the object it's drawing.
-    void draw(const ObjectTransform& transform) override;
+    void draw(const ObjectTransform& transform) const override;
 };
 
 // Implementation of Drawable interface on 2d textures.
@@ -63,5 +63,5 @@ public:
     // The only job of the TextureDrawer is to draw the correct texture,
     // in the correct way. As such, all it needs for its draw function,
     // is the position, rotation and scale of the object it's drawing.
-    void draw(const ObjectTransform& transform) override;
+    void draw(const ObjectTransform& transform) const override;
 };

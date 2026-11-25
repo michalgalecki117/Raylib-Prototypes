@@ -20,7 +20,7 @@ std::unique_ptr<Drawable> Drawable::makeDrawer(const Texture2D& texture)
 
 // draw function of the TextureDrawer class.
 // Draws its loaded texture at the position, rotation and scale indicated by transform.
-void TextureDrawer::draw(const ObjectTransform& transform) 
+void TextureDrawer::draw(const ObjectTransform& transform) const
 {
     const Vector2& position = transform.getPosition();
     const float& rotation = transform.getRotation();
@@ -42,7 +42,7 @@ void TextureDrawer::draw(const ObjectTransform& transform)
 
 // draw function of the ShapeDrawer class.
 // Draws its shape in its given color at the position, rotation and scale indicated by transform.
-void ShapeDrawer::draw(const ObjectTransform& transform) 
+void ShapeDrawer::draw(const ObjectTransform& transform) const
 {
     const Vector2& position = transform.getPosition();
     const float& rotation = transform.getRotation();

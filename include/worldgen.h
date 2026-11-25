@@ -10,7 +10,7 @@
 #include "PerlinNoise.hpp"
 #include "CDT/CDT.h"
 
-#include "obstacle.h"
+#include "gameObject.h"
 #include "shapes.h"
 
 class Perlin // Perlin noise class for generating a perlin noise texture, or noise sampling.

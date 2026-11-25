@@ -64,6 +64,7 @@ classDiagram
 
     class GameObject {
         -unique_ptr~Drawable~ renderer
+        -Texture2D texture
         -unique_ptr~Shape~ collisionShape
         -ObjectTransform transform
         -bool collider
